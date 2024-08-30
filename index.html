@@ -255,8 +255,9 @@
             <div>
                 <label for="columns">Number of Columns:</label>
                 <select id="columns" name="columns">
-                    <option value="1">1 Column</option>
-                    <option value="2" selected>2 Columns</option>
+                    <option value="1" selected>1 Column</option>
+                    <option value="2" >2 Columns</option>
+					<option value="3">3 Columns</option>
                                     </select>
             </div>
             <div class="checkbox-container">
@@ -358,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('copyHtml').addEventListener('click', function() {
         const htmlContent = document.getElementById('output').innerHTML;
         navigator.clipboard.writeText(htmlContent).then(() => {
-            alert('HTML copied to clipboard!');
+            
         });
     });
 
@@ -409,8 +410,8 @@ function createCampaignInput(index) {
                 <label for="customImageUrl${index}">Image URL:</label>
                 <input type="text" id="customImageUrl${index}" name="customImageUrl${index}" value="${state.customImageUrl || ''}" placeholder="Enter image URL">
 
-                <label for="customLearnMoreUrl${index}">Custom URL (for Learn More):</label>
-                <input type="text" id="customLearnMoreUrl${index}" name="customLearnMoreUrl${index}" value="${state.customLearnMoreUrl || ''}" placeholder="Enter custom Learn More URL">
+                <label for="customLearnMoreUrl${index}">Custom URL for Title:</label>
+                <input type="text" id="customLearnMoreUrl${index}" name="customLearnMoreUrl${index}" value="${state.customLearnMoreUrl || ''}" placeholder="Enter custom URL">
             </div>
         </div>
     `;
@@ -486,11 +487,9 @@ function generateEmail() {
     
     textAboveCampaigns = document.getElementById('textAboveCampaigns').value;
 
-    let campaignsHtml = `
-    <table cellspacing="0" cellpadding="0" border="0" width="100%">
+     let campaignsHtml = `
+    <table cellspacing="0" cellpadding="0" border="0" width="100%" style="table-layout: fixed;">
     `;
-
-    let campaignNames = [];
 
     for (let i = 0; i < numCampaigns; i++) {
         if (i % columns === 0) {
@@ -501,6 +500,7 @@ function generateEmail() {
         let cellContent = '';
 
         if (state.isCustom) {
+		
             cellContent = `
                 <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:5px;">
                     <a href="${state.customLearnMoreUrl}" style="color:#dd1e31; text-decoration:none;">${state.customTitle}</a>
@@ -518,9 +518,15 @@ function generateEmail() {
             }
 
             const urlMatch = campaignInfo.match(/(https:\/\/maxbounty\.com\/getlp\.asp\?m=\d+&o=\d+&l=\d+&s=)full/);
-            if (urlMatch) {
-                landingPage = urlMatch[1] + 'thumb';
-            }
+if (urlMatch) {
+    landingPage = urlMatch[1] + 'thumb';
+} else {
+    // If the expected URL format is not found, try to extract any URL
+    const anyUrlMatch = campaignInfo.match(/(https?:\/\/[^\s]+)/);
+    if (anyUrlMatch) {
+        landingPage = anyUrlMatch[1];
+    }
+}
 
             const lines = campaignInfo.split('\n');
             for (const line of lines) {
@@ -530,9 +536,7 @@ function generateEmail() {
                 }
             }
 
-            if (campaignName && campaignID && landingPage) {
-                campaignNames.push(campaignName);
-
+             if (campaignName && campaignID && landingPage) {
                 const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignID})`;
                 cellContent = `
                     <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:5px;">
@@ -542,52 +546,57 @@ function generateEmail() {
                     </h3>
                     <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${state.textUnderTitle}</p>
                     <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${state.customText}</p>
-                    ${!noThumbnails ? `<img src="${landingPage}" alt="${campaignName} thumbnail" style="max-width:100%; height:auto; display:block; margin:5px 0;">` : ''}
-                `;
-
-                if (useAutoSubject && i === 0) {
-                    subjectTitle = generateAutoSubject(campaignName, campaignID);
-                }
-            } else {
-                cellContent = `
-                    <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:5px;">${state.updateType !== 'None' ? state.updateType : ''}</h3>
-                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${state.textUnderTitle}</p>
-                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${state.customText}</p>
-                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">Campaign information not provided or in incorrect format.</p>
+                    ${!noThumbnails ? `<img src="${landingPage}" alt="${campaignName} thumbnail" width="100%" style="max-width:100%; height:auto; display:block; margin:5px 0;">` : ''}
                 `;
             }
         }
 
         campaignsHtml += `
-            <td style="width:${100/columns}%; vertical-align:top; padding:10px;">
-                <table cellspacing="0" cellpadding="0" border="0" width="100%">
-                    <tr>
-                        <td>
-                            ${cellContent}
-                        </td>
-                    </tr>
-                </table>
+            <td width="${Math.floor(100/columns)}%" valign="top" style="padding:10px;">
+                <!--[if gte mso 9]>
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr><td width="100%">
+                <![endif]-->
+                <div style="max-width:300px; margin:0 auto;">
+                    ${cellContent}
+                </div>
+                <!--[if gte mso 9]>
+                </td></tr></table>
+                <![endif]-->
             </td>
         `;
 
         if ((i + 1) % columns === 0 || i === numCampaigns - 1) {
-            campaignsHtml += '</tr>';
+            campaignsHtml = `
+                <tr>
+                    ${campaignsHtml}
+                </tr>
+            `;
         }
     }
 
-    campaignsHtml += '</table>';
-
-    const htmlOutput = `Subject: ${subjectTitle}
-
-<p style="color:#333333; font-family:Arial, sans-serif;">#firstName#,</p>
-<p style="color:#333333; font-family:Arial, sans-serif;">${textAboveCampaigns}</p>
-${campaignsHtml}
-<p style="color:#333333; font-family:Arial, sans-serif;">${afterLearnMore}</p>
-<p style="color:#333333; font-family:Arial, sans-serif;">If you have any questions, please contact your Affiliate Manager.</p>
-<p style="color:#333333; font-family:Arial, sans-serif;">Thanks,</p>`;
+    const htmlOutput = `
+    <div style="max-width:600px; margin:0 auto;">
+        <p style="color:#333333; font-family:Arial, sans-serif;">#firstName#,</p>
+        <p style="color:#333333; font-family:Arial, sans-serif;">${textAboveCampaigns}</p>
+        <!--[if gte mso 9]>
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        <![endif]-->
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+            ${campaignsHtml}
+        </table>
+        <!--[if gte mso 9]>
+        </table>
+        <![endif]-->
+        <p style="color:#333333; font-family:Arial, sans-serif;">${afterLearnMore}</p>
+        <p style="color:#333333; font-family:Arial, sans-serif;">If you have any questions, please contact your Affiliate Manager.</p>
+        <p style="color:#333333; font-family:Arial, sans-serif;">Thanks,</p>
+    </div>
+    `;
 
     output.innerHTML = htmlOutput;
     document.getElementById('copyHtml').style.display = 'block';
+
 }
 
 function addScrollButtons() {
