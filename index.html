@@ -198,7 +198,10 @@
         .custom-fields {
             display: none;
         }
-    </style>
+     .preserve-whitespace {
+        white-space: pre-wrap;
+    }
+</style>
 </head>
 <body>
     <h2><a href="https://admin.maxbounty.com/affiliates/mailer" style="text-decoration: none; color: var(--primary-color);">Affiliate Mailer Builder</a></h2>
@@ -321,6 +324,9 @@ document.addEventListener('DOMContentLoaded', function() {
         #output {
             font-size: 0.9em;
         }
+        .preserve-whitespace {
+            white-space: pre-wrap;
+        }
     `;
     document.head.appendChild(style);
 
@@ -359,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('copyHtml').addEventListener('click', function() {
         const htmlContent = document.getElementById('output').innerHTML;
         navigator.clipboard.writeText(htmlContent).then(() => {
-            
+            alert('HTML copied to clipboard!');
         });
     });
 
@@ -398,7 +404,8 @@ function createCampaignInput(index) {
                 <label for="customText${index}">Custom Text:</label>
                 <input type="text" id="customText${index}" name="customText${index}" value="${state.customText || ''}" placeholder="e.g., Increased rate from $10 to $15">
 
-                
+                <label for="textUnderTitle${index}">Text Under Title:</label>
+                <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="2" placeholder="Enter text to appear under the title">${state.textUnderTitle || ''}</textarea>
             </div>
             <div class="custom-fields" id="customFields${index}" style="display: ${state.isCustom ? 'block' : 'none'}">
                 <label for="customTitle${index}">Title:</label>
@@ -468,26 +475,53 @@ function initializeCampaignInputs() {
     }
 }
 
-function generateAutoSubject(campaignName, campaignID) {
-    const autoSubjectSelect = document.getElementById('autoSubjectSelect');
-    let subject = autoSubjectSelect.value;
-    subject = subject.replace(/{campaign}/g, `${campaignName} (${campaignID})`);
-    return subject;
-}
+function extractCampaignInfo(campaignInfo) {
+    let campaignName = '';
+    let campaignID = '';
 
+    const lines = campaignInfo.split('\n');
+    for (const line of lines) {
+        if (line.includes(' (')) {
+            campaignName = line.split(' - ')[0].trim();
+            break;
+        }
+    }
+
+    const idMatch = campaignInfo.match(/ID:\s(\d+)/);
+    if (idMatch) {
+        campaignID = idMatch[1];
+    }
+
+    return { name: campaignName, id: campaignID };
+}
+function nl2br(str) {
+    return str.replace(/\n/g, "<br>");
+}
 function generateEmail() {
     updateCampaignState();
     const useAutoSubject = document.getElementById('useAutoSubject').checked;
     let subjectTitle = useAutoSubject ? document.getElementById('autoSubjectSelect').value : document.getElementById('subjectTitle').value;
     const numCampaigns = parseInt(document.getElementById('numCampaigns').value);
-    const afterLearnMore = document.getElementById('afterLearnMore').value;
+    const afterLearnMore = nl2br(document.getElementById('afterLearnMore').value);
     const noThumbnails = document.getElementById('noThumbnails').checked;
     const columns = parseInt(document.getElementById('columns').value);
     const output = document.getElementById('output');
     
-    textAboveCampaigns = document.getElementById('textAboveCampaigns').value;
+    textAboveCampaigns = nl2br(document.getElementById('textAboveCampaigns').value);
 
-     let campaignsHtml = `
+    // Extract campaign info from the first non-custom campaign
+    let campaignInfo = { name: '', id: '' };
+    for (let i = 0; i < numCampaigns; i++) {
+        if (!campaignState[i].isCustom) {
+            campaignInfo = extractCampaignInfo(campaignState[i].campaignInfo);
+            break;
+        }
+    }
+
+    // Replace {campaign} in subject line
+    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} (${campaignInfo.id})`);
+
+    let campaignsHtml = `
     <table cellspacing="0" cellpadding="0" border="0" width="100%" style="table-layout: fixed;">
     `;
 
@@ -500,12 +534,11 @@ function generateEmail() {
         let cellContent = '';
 
         if (state.isCustom) {
-		
             cellContent = `
                 <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:5px;">
                     <a href="${state.customLearnMoreUrl}" style="color:#dd1e31; text-decoration:none;">${state.customTitle}</a>
                 </h3>
-                <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${state.customBodyText}</p>
+                <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customBodyText)}</p>
                 ${!noThumbnails && state.customImageUrl ? `<img src="${state.customImageUrl}" alt="Custom thumbnail" style="max-width:100%; height:auto; display:block; margin:5px 0;">` : ''}
             `;
         } else {
@@ -518,15 +551,15 @@ function generateEmail() {
             }
 
             const urlMatch = campaignInfo.match(/(https:\/\/maxbounty\.com\/getlp\.asp\?m=\d+&o=\d+&l=\d+&s=)full/);
-if (urlMatch) {
-    landingPage = urlMatch[1] + 'thumb';
-} else {
-    // If the expected URL format is not found, try to extract any URL
-    const anyUrlMatch = campaignInfo.match(/(https?:\/\/[^\s]+)/);
-    if (anyUrlMatch) {
-        landingPage = anyUrlMatch[1];
-    }
-}
+            if (urlMatch) {
+                landingPage = urlMatch[1] + 'thumb';
+            } else {
+                // If the expected URL format is not found, try to extract any URL
+                const anyUrlMatch = campaignInfo.match(/(https?:\/\/[^\s]+)/);
+                if (anyUrlMatch) {
+                    landingPage = anyUrlMatch[1];
+                }
+            }
 
             const lines = campaignInfo.split('\n');
             for (const line of lines) {
@@ -536,7 +569,7 @@ if (urlMatch) {
                 }
             }
 
-             if (campaignName && campaignID && landingPage) {
+            if (campaignName && campaignID && landingPage) {
                 const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignID})`;
                 cellContent = `
                     <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:5px;">
@@ -544,8 +577,8 @@ if (urlMatch) {
                             ${titleContent}
                         </a>
                     </h3>
-                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${state.textUnderTitle}</p>
-                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${state.customText}</p>
+                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${nl2br(state.textUnderTitle)}</p>
+                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customText)}</p>
                     ${!noThumbnails ? `<img src="${landingPage}" alt="${campaignName} thumbnail" width="100%" style="max-width:100%; height:auto; display:block; margin:5px 0;">` : ''}
                 `;
             }
@@ -567,24 +600,21 @@ if (urlMatch) {
         `;
 
         if ((i + 1) % columns === 0 || i === numCampaigns - 1) {
-            campaignsHtml = `
-                <tr>
-                    ${campaignsHtml}
-                </tr>
-            `;
+            campaignsHtml += '</tr>';
         }
     }
 
+    campaignsHtml += '</table>';
+
     const htmlOutput = `
+    <p style="color:#333333; font-family:Arial, sans-serif;"><strong>Subject Line:</strong> ${subjectTitle}</p>
     <div style="max-width:600px; margin:0 auto;">
         <p style="color:#333333; font-family:Arial, sans-serif;">#firstName#,</p>
         <p style="color:#333333; font-family:Arial, sans-serif;">${textAboveCampaigns}</p>
         <!--[if gte mso 9]>
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
         <![endif]-->
-        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
-            ${campaignsHtml}
-        </table>
+        ${campaignsHtml}
         <!--[if gte mso 9]>
         </table>
         <![endif]-->
@@ -596,8 +626,8 @@ if (urlMatch) {
 
     output.innerHTML = htmlOutput;
     document.getElementById('copyHtml').style.display = 'block';
-
 }
+
 
 function addScrollButtons() {
     const scrollTopBtn = document.createElement('button');
