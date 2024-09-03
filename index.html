@@ -673,8 +673,11 @@ function generateEmail() {
     subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} - ${campaignInfo.type} (${campaignInfo.country})`);
     console.log('Final subject title:', subjectTitle);
 
+    const totalWidth = 600;
+    const cellWidth = Math.floor(totalWidth / columns);
+
     let campaignsHtml = `
-    <table cellspacing="0" cellpadding="0" border="0" width="100%" style="table-layout: fixed;">
+    <table cellspacing="0" cellpadding="0" border="0" width="${totalWidth}" style="width:${totalWidth}px;">
     `;
 
     for (let i = 0; i < numCampaigns; i++) {
@@ -686,7 +689,7 @@ function generateEmail() {
         let cellContent = '';
 
         const priorityStyle = state.priorityLevel ? `border-left: 5px solid ${getPriorityColor(state.priorityLevel)};` : '';
-        const highlightStyle = state.highlight ? 'background-color: #dd1e31; color: white; border-radius: 10px; padding: 10px;' : '';
+        const highlightStyle = state.highlight ? 'background-color: #dd1e31; color: white;' : '';
 
         if (state.isCustom) {
             const titleContent = state.customLearnMoreUrl 
@@ -700,7 +703,7 @@ function generateEmail() {
                 <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customBodyText)}</p>
                 ${!noThumbnails && state.customImageUrl ? `
                     <a href="${state.customLearnMoreUrl || '#'}">
-                        <img src="${state.customImageUrl}" alt="Custom thumbnail" style="max-width:100%; height:auto; display:block; margin:10px 0;">
+                        <img src="${state.customImageUrl}" alt="${state.customTitle}" width="${cellWidth - 20}" style="display:block; margin:10px auto;" />
                     </a>
                 ` : ''}
             `;
@@ -716,56 +719,36 @@ function generateEmail() {
             if (urlMatch) {
                 landingPage = urlMatch[1] + 'thumb';
             } else {
-                // If the expected URL format is not found, try to extract any URL
                 const anyUrlMatch = (state.campaignInfo || '').match(/(https?:\/\/[^\s]+)/);
                 if (anyUrlMatch) {
                     landingPage = anyUrlMatch[1];
                 }
             }
 
-            if (campaignName && campaignID && landingPage) {
+            if (campaignName && campaignID) {
                 const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} - ${campaignType} (${campaignCountry})`;
                 cellContent = `
-                    <div style="text-align: center; max-width: ${numCampaigns === 1 ? '600px' : '300px'}; margin: 0 auto;">
-                        <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
-                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                                ${titleContent}
-                            </a>
-                        </h3>
-                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
-                        ${!noThumbnails ? `
-                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
-                                <img src="${landingPage}" alt="${campaignName} thumbnail" style="width:100%; height:auto; display:block; margin:0px auto;">
-                            </a>
-                        ` : ''}
-                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
-                    </div>
+                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
+                        <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                            ${titleContent}
+                        </a>
+                    </h3>
+                    <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
+                    ${!noThumbnails && landingPage ? `
+                        <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
+                            <img src="${landingPage}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto;" />
+                        </a>
+                    ` : ''}
+                    <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
                 `;
             }
         }
 
-        if (numCampaigns === 1) {
-            campaignsHtml += `
-                <div style="max-width:600px; margin:0 auto; ${highlightStyle} ${priorityStyle}">
-                    ${cellContent}
-                </div>
-            `;
-        } else {
-            campaignsHtml += `
-                <td width="${Math.floor(100/columns)}%" valign="top" style="padding:10px;">
-                    <!--[if gte mso 9]>
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                    <tr><td width="100%">
-                    <![endif]-->
-                    <div style="max-width:300px; margin:0 auto; ${highlightStyle} ${priorityStyle}">
-                        ${cellContent}
-                    </div>
-                    <!--[if gte mso 9]>
-                    </td></tr></table>
-                    <![endif]-->
-                </td>
-            `;
-        }
+        campaignsHtml += `
+            <td width="${cellWidth}" valign="top" style="padding:10px; ${priorityStyle} ${highlightStyle}">
+                ${cellContent}
+            </td>
+        `;
 
         if ((i + 1) % columns === 0 || i === numCampaigns - 1) {
             campaignsHtml += '</tr>';
@@ -775,21 +758,36 @@ function generateEmail() {
     campaignsHtml += '</table>';
 
     const htmlOutput = `
-    <p style="color:#333333; font-family:Arial, sans-serif;">${subjectTitle}</p>
-    <div style="max-width:600px; margin:0 auto;">
-        <p style="color:#333333; font-family:Arial, sans-serif;">#firstName#,</p>
-        <p style="color:#333333; font-family:Arial, sans-serif;">${textAboveCampaigns}</p>
-        <!--[if gte mso 9]>
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
-        <![endif]-->
-        ${campaignsHtml}
-        <!--[if gte mso 9]>
-        </table>
-        <![endif]-->
-        <p style="color:#333333; font-family:Arial, sans-serif;">${afterLearnMore}</p>
-        <p style="color:#333333; font-family:Arial, sans-serif;">If you have any questions, please contact your Affiliate Manager.</p>
-        <p style="color:#333333; font-family:Arial, sans-serif;">Thanks,</p>
-    </div>
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>${subjectTitle}</title>
+    </head>
+    <body style="margin:0; padding:0; background-color:#F2F2F2;">
+        <center>
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#F2F2F2">
+                <tr>
+                    <td align="center" valign="top">
+                        <table border="0" cellpadding="0" cellspacing="0" width="${totalWidth}" style="max-width:${totalWidth}px;">
+                            <tr>
+                                <td align="left" valign="top" style="padding:20px; font-family:Arial, sans-serif; color:#333333;">
+                                    <p style="font-size:16px; margin-bottom:20px;">${subjectTitle}</p>
+                                    <p style="font-size:14px; margin-bottom:20px;">#firstName#,</p>
+                                    <p style="font-size:14px; margin-bottom:20px;">${textAboveCampaigns}</p>
+                                    ${campaignsHtml}
+                                    <p style="font-size:14px; margin-top:20px;">${afterLearnMore}</p>
+                                    <p style="font-size:14px; margin-top:20px;">If you have any questions, please contact your Affiliate Manager.</p>
+                                    <p style="font-size:14px; margin-top:20px;">Thanks,</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </center>
+    </body>
+    </html>
     `;
 
     console.log('Final HTML output:', htmlOutput);
