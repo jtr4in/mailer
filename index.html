@@ -459,6 +459,13 @@ function createCampaignInput(index) {
                     <input type="checkbox" id="highlightStandard${index}" name="highlightStandard${index}" ${state.highlight ? 'checked' : ''}>
                     <label for="highlightStandard${index}">Highlight Campaign</label>
                 </div>
+                <label for="priorityLevel${index}">Priority Level:</label>
+                <select id="priorityLevel${index}" name="priorityLevel${index}">
+                    <option value="None" ${state.priorityLevel === 'None' ? 'selected' : ''}>None</option>
+                    <option value="Low" ${state.priorityLevel === 'Low' ? 'selected' : ''}>Low</option>
+                    <option value="Medium" ${state.priorityLevel === 'Medium' ? 'selected' : ''}>Medium</option>
+                    <option value="High" ${state.priorityLevel === 'High' ? 'selected' : ''}>High</option>
+                </select>
             </div>
             <div class="custom-fields" id="customFields${index}" style="display: ${state.isCustom ? 'block' : 'none'}">
                 <label for="customTitle${index}">Title:</label>
@@ -499,7 +506,10 @@ function toggleCustomFields(index) {
 }
 
 function updateCampaignState(newNumCampaigns) {
+    console.log('updateCampaignState called');
     const numCampaigns = newNumCampaigns || parseInt(document.getElementById('numCampaigns').value);
+    console.log('Number of campaigns:', numCampaigns);
+    
     for (let i = 0; i < numCampaigns; i++) {
         const customToggle = document.getElementById(`customToggle${i}`);
         if (customToggle) {
@@ -520,10 +530,14 @@ function updateCampaignState(newNumCampaigns) {
                 campaignInfo: document.getElementById(`campaignInfo${i}`)?.value || '',
                 customText: document.getElementById(`customText${i}`)?.value || '',
                 textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
-                highlight: highlight
+                highlight: highlight,
+                priorityLevel: document.getElementById(`priorityLevel${i}`)?.value || 'None'
             };
+        } else {
+            console.error(`customToggle${i} not found`);
         }
     }
+    console.log('Updated campaign state:', campaignState);
     // Trim the campaignState array if the number of campaigns has decreased
     campaignState = campaignState.slice(0, numCampaigns);
 }
@@ -544,22 +558,31 @@ function extractCampaignInfo(campaignInfo) {
     let campaignCountry = '';
 
     const lines = campaignInfo.split('\n');
-    for (const line of lines) {
-        if (line.includes(' - ')) {
-            const parts = line.split(' - ');
+    if (lines.length > 0) {
+        const firstLine = lines[0];
+        const parts = firstLine.split(' - ');
+        if (parts.length >= 3) {
             campaignName = parts[0].trim();
-            campaignType = parts[1].trim().split(' (')[0];
-            campaignCountry = parts[1].trim().split(' (')[1].replace(')', '');
-            break;
+            campaignType = parts[1].trim();
+            const countryMatch = parts[2].match(/\(([^)]+)\)/);
+            if (countryMatch) {
+                campaignCountry = countryMatch[1].trim();
+            }
         }
     }
 
-    const idMatch = campaignInfo.match(/ID:\s(\d+)/);
+    // Extract ID from the text
+    const idMatch = campaignInfo.match(/ID:\s*(\d+)/);
     if (idMatch) {
         campaignID = idMatch[1];
     }
 
-    return { name: campaignName, id: campaignID, type: campaignType, country: campaignCountry };
+    return { 
+        name: campaignName || 'Unknown Campaign', 
+        id: campaignID || 'Unknown ID', 
+        type: campaignType || 'Unknown Type', 
+        country: campaignCountry || 'Unknown Country' 
+    };
 }
 function nl2br(str) {
     return str.replace(/\n/g, "<br>");
@@ -567,15 +590,74 @@ function nl2br(str) {
 function generateEmail() {
     console.log('generateEmail function called');
     updateCampaignState();
-    const useAutoSubject = document.getElementById('useAutoSubject').checked;
-    let subjectTitle = useAutoSubject ? document.getElementById('autoSubjectSelect').value : document.getElementById('subjectTitle').value;
-    const numCampaigns = parseInt(document.getElementById('numCampaigns').value);
-    const afterLearnMore = nl2br(document.getElementById('afterLearnMore').value);
-    const noThumbnails = document.getElementById('noThumbnails').checked;
-    const columns = parseInt(document.getElementById('columns').value);
+    console.log('Campaign state:', campaignState);
+
+    const useAutoSubject = document.getElementById('useAutoSubject');
+    if (!useAutoSubject) {
+        console.error('useAutoSubject element not found');
+        return;
+    }
+    const useAutoSubjectChecked = useAutoSubject.checked;
+    console.log('Use auto subject:', useAutoSubjectChecked);
+
+    let subjectTitle;
+    if (useAutoSubjectChecked) {
+        const autoSubjectSelect = document.getElementById('autoSubjectSelect');
+        if (!autoSubjectSelect) {
+            console.error('autoSubjectSelect element not found');
+            return;
+        }
+        subjectTitle = autoSubjectSelect.value;
+    } else {
+        const subjectTitleInput = document.getElementById('subjectTitle');
+        if (!subjectTitleInput) {
+            console.error('subjectTitle element not found');
+            return;
+        }
+        subjectTitle = subjectTitleInput.value;
+    }
+    console.log('Subject title:', subjectTitle);
+
+    const numCampaignsElement = document.getElementById('numCampaigns');
+    if (!numCampaignsElement) {
+        console.error('numCampaigns element not found');
+        return;
+    }
+    const numCampaigns = parseInt(numCampaignsElement.value);
+    console.log('Number of campaigns:', numCampaigns);
+
+    const afterLearnMoreElement = document.getElementById('afterLearnMore');
+    if (!afterLearnMoreElement) {
+        console.error('afterLearnMore element not found');
+        return;
+    }
+    const afterLearnMore = nl2br(afterLearnMoreElement.value);
+    console.log('Text before sign off:', afterLearnMore);
+
+    const noThumbnailsCheckbox = document.getElementById('noThumbnails');
+    if (!noThumbnailsCheckbox) {
+        console.error('noThumbnails element not found');
+        return;
+    }
+    const noThumbnails = noThumbnailsCheckbox.checked;
+    console.log('No thumbnails:', noThumbnails);
+
+    const columnsSelect = document.getElementById('columns');
+    if (!columnsSelect) {
+        console.error('columns element not found');
+        return;
+    }
+    const columns = parseInt(columnsSelect.value);
+    console.log('Number of columns:', columns);
+
     const output = document.getElementById('output');
-    
+    if (!output) {
+        console.error('output element not found');
+        return;
+    }
+
     textAboveCampaigns = nl2br(document.getElementById('textAboveCampaigns').value);
+    console.log('Text above campaigns:', textAboveCampaigns);
 
     // Extract campaign info from the first non-custom campaign
     let campaignInfo = { name: '', id: '', type: '', country: '' };
@@ -585,9 +667,11 @@ function generateEmail() {
             break;
         }
     }
+    console.log('Campaign info:', campaignInfo);
 
     // Replace {campaign} in subject line
     subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} - ${campaignInfo.type} (${campaignInfo.country})`);
+    console.log('Final subject title:', subjectTitle);
 
     let campaignsHtml = `
     <table cellspacing="0" cellpadding="0" border="0" width="100%" style="table-layout: fixed;">
@@ -601,16 +685,19 @@ function generateEmail() {
         const state = campaignState[i];
         let cellContent = '';
 
+        const priorityStyle = state.priorityLevel ? `border-left: 5px solid ${getPriorityColor(state.priorityLevel)};` : '';
+        const highlightStyle = state.highlight ? 'background-color: #dd1e31; color: white; border-radius: 10px; padding: 10px;' : '';
+
         if (state.isCustom) {
             const titleContent = state.customLearnMoreUrl 
-                ? `<a href="${state.customLearnMoreUrl}" style="color:#dd1e31; text-decoration:none;">${state.customTitle}</a>`
+                ? `<a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">${state.customTitle}</a>`
                 : state.customTitle;
             
             cellContent = `
-                <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:5px;">
+                <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px;">
                     ${titleContent}
                 </h3>
-                <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customBodyText)}</p>
+                <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customBodyText)}</p>
                 ${!noThumbnails && state.customImageUrl ? `
                     <a href="${state.customLearnMoreUrl || '#'}">
                         <img src="${state.customImageUrl}" alt="Custom thumbnail" style="max-width:100%; height:auto; display:block; margin:10px 0;">
@@ -618,19 +705,19 @@ function generateEmail() {
                 ` : ''}
             `;
         } else {
-            const campaignInfo = extractCampaignInfo(state.campaignInfo);
+            const campaignInfo = extractCampaignInfo(state.campaignInfo || '');
             let campaignName = campaignInfo.name;
             let campaignID = campaignInfo.id;
             let campaignType = campaignInfo.type;
             let campaignCountry = campaignInfo.country;
-            let landingPage;
+            let landingPage = '';
 
-            const urlMatch = state.campaignInfo.match(/(https:\/\/maxbounty\.com\/getlp\.asp\?m=\d+&o=\d+&l=\d+&s=)full/);
+            const urlMatch = (state.campaignInfo || '').match(/(https:\/\/maxbounty\.com\/getlp\.asp\?m=\d+&o=\d+&l=\d+&s=)full/);
             if (urlMatch) {
                 landingPage = urlMatch[1] + 'thumb';
             } else {
                 // If the expected URL format is not found, try to extract any URL
-                const anyUrlMatch = state.campaignInfo.match(/(https?:\/\/[^\s]+)/);
+                const anyUrlMatch = (state.campaignInfo || '').match(/(https?:\/\/[^\s]+)/);
                 if (anyUrlMatch) {
                     landingPage = anyUrlMatch[1];
                 }
@@ -640,28 +727,26 @@ function generateEmail() {
                 const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} - ${campaignType} (${campaignCountry})`;
                 cellContent = `
                     <div style="text-align: center; max-width: ${numCampaigns === 1 ? '600px' : '300px'}; margin: 0 auto;">
-                        <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:10px;">
-                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:#dd1e31; text-decoration:none;">
+                        <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
                                 ${titleContent}
                             </a>
                         </h3>
-                        <p style="color:#333333; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
+                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
                         ${!noThumbnails ? `
                             <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
                                 <img src="${landingPage}" alt="${campaignName} thumbnail" style="width:100%; height:auto; display:block; margin:0px auto;">
                             </a>
                         ` : ''}
-                        <p style="color:#333333; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
+                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
                     </div>
                 `;
             }
         }
 
-        const highlightStyle = state.highlight ? 'border: 2px solid #000000; border-radius: 10px; padding: 10px;' : '';
-
         if (numCampaigns === 1) {
             campaignsHtml += `
-                <div style="max-width:600px; margin:0 auto; ${highlightStyle}">
+                <div style="max-width:600px; margin:0 auto; ${highlightStyle} ${priorityStyle}">
                     ${cellContent}
                 </div>
             `;
@@ -672,7 +757,7 @@ function generateEmail() {
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tr><td width="100%">
                     <![endif]-->
-                    <div style="max-width:300px; margin:0 auto; ${highlightStyle}">
+                    <div style="max-width:300px; margin:0 auto; ${highlightStyle} ${priorityStyle}">
                         ${cellContent}
                     </div>
                     <!--[if gte mso 9]>
@@ -707,10 +792,30 @@ function generateEmail() {
     </div>
     `;
 
+    console.log('Final HTML output:', htmlOutput);
     output.innerHTML = htmlOutput;
-    document.getElementById('copyHtml').style.display = 'block';
+    
+    const copyHtmlBtn = document.getElementById('copyHtml');
+    if (copyHtmlBtn) {
+        copyHtmlBtn.style.display = 'block';
+    } else {
+        console.error('copyHtml button not found');
+    }
 }
 
+function getPriorityColor(priority) {
+    switch (priority) {
+        case 'High':
+            return '#ff0000';
+        case 'Medium':
+            return '#ffa500';
+        case 'Low':
+            return '#008000';
+        case 'None':
+        default:
+            return 'transparent';
+    }
+}
 
 function addScrollButtons() {
     const scrollTopBtn = document.createElement('button');
@@ -755,6 +860,20 @@ function addScrollButtons() {
         }
     };
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const generateEmailBtn = document.getElementById('generateEmailBtn');
+    if (generateEmailBtn) {
+        generateEmailBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Generate button clicked');
+            updateCampaignState();
+            generateEmail();
+        });
+    } else {
+        console.error('Generate Email button not found');
+    }
+});
     </script>
 </body>
 </html>
