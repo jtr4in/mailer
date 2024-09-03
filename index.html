@@ -401,8 +401,7 @@ function createCampaignInput(index) {
                 <label for="campaignInfo${index}">Paste "Copy Image" from Admin:</label>
                 <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="3" placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
 
-                <label for="customText${index}">Custom Text:</label>
-                <input type="text" id="customText${index}" name="customText${index}" value="${state.customText || ''}" placeholder="e.g., Increased rate from $10 to $15">
+           
 
                 <label for="textUnderTitle${index}">Text Under Title:</label>
                 <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="2" placeholder="Enter text to appear under the title">${state.textUnderTitle || ''}</textarea>
@@ -478,11 +477,16 @@ function initializeCampaignInputs() {
 function extractCampaignInfo(campaignInfo) {
     let campaignName = '';
     let campaignID = '';
+    let campaignType = '';
+    let campaignCountry = '';
 
     const lines = campaignInfo.split('\n');
     for (const line of lines) {
-        if (line.includes(' (')) {
-            campaignName = line.split(' - ')[0].trim();
+        if (line.includes(' - ')) {
+            const parts = line.split(' - ');
+            campaignName = parts[0].trim();
+            campaignType = parts[1].trim().split(' (')[0];
+            campaignCountry = parts[1].trim().split(' (')[1].replace(')', '');
             break;
         }
     }
@@ -492,7 +496,7 @@ function extractCampaignInfo(campaignInfo) {
         campaignID = idMatch[1];
     }
 
-    return { name: campaignName, id: campaignID };
+    return { name: campaignName, id: campaignID, type: campaignType, country: campaignCountry };
 }
 function nl2br(str) {
     return str.replace(/\n/g, "<br>");
@@ -510,7 +514,7 @@ function generateEmail() {
     textAboveCampaigns = nl2br(document.getElementById('textAboveCampaigns').value);
 
     // Extract campaign info from the first non-custom campaign
-    let campaignInfo = { name: '', id: '' };
+    let campaignInfo = { name: '', id: '', type: '', country: '' };
     for (let i = 0; i < numCampaigns; i++) {
         if (!campaignState[i].isCustom) {
             campaignInfo = extractCampaignInfo(campaignState[i].campaignInfo);
@@ -519,7 +523,7 @@ function generateEmail() {
     }
 
     // Replace {campaign} in subject line
-    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} (${campaignInfo.id})`);
+    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} - ${campaignInfo.type} (${campaignInfo.country})`);
 
     let campaignsHtml = `
     <table cellspacing="0" cellpadding="0" border="0" width="100%" style="table-layout: fixed;">
@@ -542,62 +546,63 @@ function generateEmail() {
                 ${!noThumbnails && state.customImageUrl ? `<img src="${state.customImageUrl}" alt="Custom thumbnail" style="max-width:100%; height:auto; display:block; margin:5px 0;">` : ''}
             `;
         } else {
-            const campaignInfo = state.campaignInfo;
-            let campaignName, campaignID, landingPage;
+            const campaignInfo = extractCampaignInfo(state.campaignInfo);
+            let campaignName = campaignInfo.name;
+            let campaignID = campaignInfo.id;
+            let campaignType = campaignInfo.type;
+            let campaignCountry = campaignInfo.country;
+            let landingPage;
 
-            const idMatch = campaignInfo.match(/ID:\s(\d+)/);
-            if (idMatch) {
-                campaignID = idMatch[1];
-            }
-
-            const urlMatch = campaignInfo.match(/(https:\/\/maxbounty\.com\/getlp\.asp\?m=\d+&o=\d+&l=\d+&s=)full/);
+            const urlMatch = state.campaignInfo.match(/(https:\/\/maxbounty\.com\/getlp\.asp\?m=\d+&o=\d+&l=\d+&s=)full/);
             if (urlMatch) {
                 landingPage = urlMatch[1] + 'thumb';
             } else {
                 // If the expected URL format is not found, try to extract any URL
-                const anyUrlMatch = campaignInfo.match(/(https?:\/\/[^\s]+)/);
+                const anyUrlMatch = state.campaignInfo.match(/(https?:\/\/[^\s]+)/);
                 if (anyUrlMatch) {
                     landingPage = anyUrlMatch[1];
                 }
             }
 
-            const lines = campaignInfo.split('\n');
-            for (const line of lines) {
-                if (line.includes(' (')) {
-                    campaignName = line.split(' - ')[0].trim();
-                    break;
-                }
-            }
-
             if (campaignName && campaignID && landingPage) {
-                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignID})`;
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} - ${campaignType} (${campaignCountry})`;
                 cellContent = `
-                    <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:5px;">
-                        <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:#dd1e31; text-decoration:none;">
-                            ${titleContent}
-                        </a>
-                    </h3>
-                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${nl2br(state.textUnderTitle)}</p>
-                    <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customText)}</p>
-                    ${!noThumbnails ? `<img src="${landingPage}" alt="${campaignName} thumbnail" width="100%" style="max-width:100%; height:auto; display:block; margin:5px 0;">` : ''}
+                    <div style="text-align: center; max-width: ${numCampaigns === 1 ? '600px' : '300px'}; margin: 0 auto;">
+                        <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:10px;">
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:#dd1e31; text-decoration:none;">
+                                ${titleContent}
+                            </a>
+                        </h3>
+                        <p style="color:#333333; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
+                        ${!noThumbnails ? `<img src="${landingPage}" alt="${campaignName} thumbnail" style="max-width:100%; height:auto; display:block; margin:0 auto 10px;">` : ''}
+                        <p style="color:#333333; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
+                    </div>
                 `;
             }
         }
 
-        campaignsHtml += `
-            <td width="${Math.floor(100/columns)}%" valign="top" style="padding:10px;">
-                <!--[if gte mso 9]>
-                <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr><td width="100%">
-                <![endif]-->
-                <div style="max-width:300px; margin:0 auto;">
+        if (numCampaigns === 1) {
+            campaignsHtml += `
+                <div style="max-width:600px; margin:0 auto;">
                     ${cellContent}
                 </div>
-                <!--[if gte mso 9]>
-                </td></tr></table>
-                <![endif]-->
-            </td>
-        `;
+            `;
+        } else {
+            campaignsHtml += `
+                <td width="${Math.floor(100/columns)}%" valign="top" style="padding:10px;">
+                    <!--[if gte mso 9]>
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tr><td width="100%">
+                    <![endif]-->
+                    <div style="max-width:300px; margin:0 auto;">
+                        ${cellContent}
+                    </div>
+                    <!--[if gte mso 9]>
+                    </td></tr></table>
+                    <![endif]-->
+                </td>
+            `;
+        }
 
         if ((i + 1) % columns === 0 || i === numCampaigns - 1) {
             campaignsHtml += '</tr>';
