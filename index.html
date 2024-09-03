@@ -455,6 +455,10 @@ function createCampaignInput(index) {
 
                 <label for="textUnderTitle${index}">Text Under Title:</label>
                 <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="2" placeholder="Enter text to appear under the title">${state.textUnderTitle || ''}</textarea>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="highlightStandard${index}" name="highlightStandard${index}" ${state.highlight ? 'checked' : ''}>
+                    <label for="highlightStandard${index}">Highlight Campaign</label>
+                </div>
             </div>
             <div class="custom-fields" id="customFields${index}" style="display: ${state.isCustom ? 'block' : 'none'}">
                 <label for="customTitle${index}">Title:</label>
@@ -468,6 +472,10 @@ function createCampaignInput(index) {
 
                 <label for="customLearnMoreUrl${index}">Custom URL for Title:</label>
                 <input type="text" id="customLearnMoreUrl${index}" name="customLearnMoreUrl${index}" value="${state.customLearnMoreUrl || ''}" placeholder="Enter custom URL">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="highlightCustom${index}" name="highlightCustom${index}" ${state.highlight ? 'checked' : ''}>
+                    <label for="highlightCustom${index}">Highlight Campaign</label>
+                </div>
             </div>
         </div>
     `;
@@ -496,18 +504,23 @@ function updateCampaignState(newNumCampaigns) {
         const customToggle = document.getElementById(`customToggle${i}`);
         if (customToggle) {
             const isCustom = customToggle.checked;
+            const highlight = isCustom 
+                ? document.getElementById(`highlightCustom${i}`).checked
+                : document.getElementById(`highlightStandard${i}`).checked;
             campaignState[i] = isCustom ? {
                 isCustom: true,
                 customTitle: document.getElementById(`customTitle${i}`)?.value || '',
                 customBodyText: document.getElementById(`customBodyText${i}`)?.value || '',
                 customImageUrl: document.getElementById(`customImageUrl${i}`)?.value || '',
-                customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || ''
+                customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
+                highlight: highlight
             } : {
                 isCustom: false,
                 updateType: document.getElementById(`updateType${i}`)?.value || '',
                 campaignInfo: document.getElementById(`campaignInfo${i}`)?.value || '',
                 customText: document.getElementById(`customText${i}`)?.value || '',
-                textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || ''
+                textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
+                highlight: highlight
             };
         }
     }
@@ -598,7 +611,11 @@ function generateEmail() {
                     ${titleContent}
                 </h3>
                 <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customBodyText)}</p>
-                ${!noThumbnails && state.customImageUrl ? `<img src="${state.customImageUrl}" alt="Custom thumbnail" style="max-width:100%; height:auto; display:block; margin:5px 0;">` : ''}
+                ${!noThumbnails && state.customImageUrl ? `
+                    <a href="${state.customLearnMoreUrl || '#'}">
+                        <img src="${state.customImageUrl}" alt="Custom thumbnail" style="max-width:100%; height:auto; display:block; margin:10px 0;">
+                    </a>
+                ` : ''}
             `;
         } else {
             const campaignInfo = extractCampaignInfo(state.campaignInfo);
@@ -629,16 +646,22 @@ function generateEmail() {
                             </a>
                         </h3>
                         <p style="color:#333333; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
-                        ${!noThumbnails ? `<img src="${landingPage}" alt="${campaignName} thumbnail" style="max-width:100%; height:auto; display:block; margin:0 auto 10px;">` : ''}
+                        ${!noThumbnails ? `
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
+                                <img src="${landingPage}" alt="${campaignName} thumbnail" style="width:100%; height:auto; display:block; margin:0px auto;">
+                            </a>
+                        ` : ''}
                         <p style="color:#333333; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
                     </div>
                 `;
             }
         }
 
+        const highlightStyle = state.highlight ? 'border: 2px solid #000000; border-radius: 10px; padding: 10px;' : '';
+
         if (numCampaigns === 1) {
             campaignsHtml += `
-                <div style="max-width:600px; margin:0 auto;">
+                <div style="max-width:600px; margin:0 auto; ${highlightStyle}">
                     ${cellContent}
                 </div>
             `;
@@ -649,7 +672,7 @@ function generateEmail() {
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tr><td width="100%">
                     <![endif]-->
-                    <div style="max-width:300px; margin:0 auto;">
+                    <div style="max-width:300px; margin:0 auto; ${highlightStyle}">
                         ${cellContent}
                     </div>
                     <!--[if gte mso 9]>
