@@ -201,6 +201,53 @@
      .preserve-whitespace {
         white-space: pre-wrap;
     }
+
+    .toggle-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .tooltip-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-left: 10px;
+    }
+
+    .tooltip-text {
+        visibility: hidden;
+        width: 120px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 12px;
+        line-height: 1.4;
+        white-space: nowrap;
+    }
+
+    .tooltip-wrapper:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #555 transparent transparent transparent;
+    }
 </style>
 </head>
 <body>
@@ -243,6 +290,9 @@
             </select>
         </div>
 
+        <label for="textAboveCampaigns">Text Above All Campaigns:</label>
+        <textarea id="textAboveCampaigns" placeholder="Enter text to appear above all campaigns" rows="3" style="width: 100%; margin-bottom: 20px;"></textarea>
+
         <div class="form-row">
             <div>
                 <label for="numCampaigns"># of Campaigns:</label>
@@ -253,15 +303,21 @@
                     <option value="4">4 Campaigns</option>
                     <option value="5">5 Campaigns</option>
                     <option value="6">6 Campaigns</option>
+                    <option value="7">7 Campaigns</option>
+                    <option value="8">8 Campaigns</option>
+                    <option value="9">9 Campaigns</option>
+                    <option value="10">10 Campaigns</option>
+                    <option value="11">11 Campaigns</option>
+                    <option value="12">12 Campaigns</option>
                 </select>
             </div>
             <div>
                 <label for="columns">Number of Columns:</label>
                 <select id="columns" name="columns">
                     <option value="1" selected>1 Column</option>
-                    <option value="2" >2 Columns</option>
-					<option value="3">3 Columns</option>
-                                    </select>
+                    <option value="2">2 Columns</option>
+                    <option value="3">3 Columns</option>
+                </select>
             </div>
             <div class="checkbox-container">
                 <input type="checkbox" id="noThumbnails" name="noThumbnails">
@@ -284,7 +340,7 @@
 
 
     <script>
-	let campaignState = [{}, {}, {}, {}, {}, {}];
+	let campaignState = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
 let textAboveCampaigns = '';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -330,19 +386,6 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     document.head.appendChild(style);
 
-    // Add new textarea for text above campaigns
-    const textAboveCampaignsInput = document.createElement('textarea');
-    textAboveCampaignsInput.id = 'textAboveCampaigns';
-    textAboveCampaignsInput.placeholder = 'Enter text to appear above all campaigns';
-    textAboveCampaignsInput.rows = 3;
-    textAboveCampaignsInput.style.width = '100%';
-    textAboveCampaignsInput.style.marginBottom = '20px';
-
-    // Insert the new textarea into the form
-    const form = document.getElementById('emailBuilderForm');
-    const campaignInputs = document.getElementById('campaignInputs');
-    form.insertBefore(textAboveCampaignsInput, campaignInputs);
-
     initializeCampaignInputs();
 
     document.getElementById('useAutoSubject').addEventListener('change', function() {
@@ -358,6 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('emailBuilderForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        console.log('Form submitted');
         updateCampaignState();
         generateEmail();
     });
@@ -383,10 +427,16 @@ function createCampaignInput(index) {
         <div class="campaign-item">
             <div class="campaign-header">
                 <h3>Campaign ${index + 1}</h3>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="customToggle${index}" onchange="toggleCustomFields(${index})" ${state.isCustom ? 'checked' : ''}>
-                    <span class="slider"></span>
-                </label>
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="customToggle${index}" onchange="toggleCustomFields(${index})" ${state.isCustom ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                    <div class="tooltip-wrapper">
+                        <span>Custom</span>
+                        <span class="tooltip-text">Toggle for custom</span>
+                    </div>
+                </div>
             </div>
             <div class="standard-fields" id="standardFields${index}" style="display: ${state.isCustom ? 'none' : 'block'}">
                 <label for="updateType${index}">Update Type:</label>
@@ -502,6 +552,7 @@ function nl2br(str) {
     return str.replace(/\n/g, "<br>");
 }
 function generateEmail() {
+    console.log('generateEmail function called');
     updateCampaignState();
     const useAutoSubject = document.getElementById('useAutoSubject').checked;
     let subjectTitle = useAutoSubject ? document.getElementById('autoSubjectSelect').value : document.getElementById('subjectTitle').value;
@@ -538,9 +589,13 @@ function generateEmail() {
         let cellContent = '';
 
         if (state.isCustom) {
+            const titleContent = state.customLearnMoreUrl 
+                ? `<a href="${state.customLearnMoreUrl}" style="color:#dd1e31; text-decoration:none;">${state.customTitle}</a>`
+                : state.customTitle;
+            
             cellContent = `
                 <h3 style="color:#333333; font-size:14px; margin-top:0; margin-bottom:5px;">
-                    <a href="${state.customLearnMoreUrl}" style="color:#dd1e31; text-decoration:none;">${state.customTitle}</a>
+                    ${titleContent}
                 </h3>
                 <p style="color:#333333; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customBodyText)}</p>
                 ${!noThumbnails && state.customImageUrl ? `<img src="${state.customImageUrl}" alt="Custom thumbnail" style="max-width:100%; height:auto; display:block; margin:5px 0;">` : ''}
