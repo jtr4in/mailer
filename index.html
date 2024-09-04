@@ -587,7 +587,7 @@ function extractCampaignInfo(campaignInfo) {
         name: campaignName || 'Unknown Campaign', 
         id: campaignID || '', 
         type: campaignType || '', 
-        country: campaignCountry || '' // Changed from 'Unknown Country' to ''
+        country: campaignCountry || ''
     };
 }
 
@@ -609,68 +609,36 @@ function generateEmail() {
     console.log('Final subject title:', subjectTitle);
 
     emailContent += `
-        <div style="background-color:#f0f0f0; padding:20px;">
-            <div style="max-width:600px; margin:0 auto; background-color:#ffffff; padding:20px; border-radius:5px;">
-                <h2 style="color:#dd1e31; text-align:center; margin-bottom:30px;">${subjectTitle}</h2>
-                <div style="font-size:14px; line-height:1.6;">
-                    <p style="margin-bottom:20px;">${nl2br(textAboveCampaigns)}</p>
-                    <div style="display:grid; grid-template-columns:repeat(${columns}, 1fr); gap:30px;">
-    `;
+${subjectTitle}
 
-    for (let i = 0; i < numCampaigns; i++) {
-        const state = campaignState[i];
-        let cellContent = '';
-
-        if (state.isCustom) {
-            cellContent = `
-                <div style="border:1px solid #cccccc; padding:20px; border-radius:5px; background-color:#ffffff; transition:all 0.3s ease; opacity:0; animation:fadeIn 0.5s ease forwards;">
-                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
-                        <a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                            ${state.customTitle}
-                        </a>
-                    </h3>
-                    <p style="margin-bottom:10px;">${nl2br(state.customBodyText)}</p>
-                    <img src="${state.customImageUrl}" alt="${state.customTitle}" style="max-width:100%; margin-bottom:10px;">
-                </div>
-            `;
-        } else {
-            const campaignInfo = extractCampaignInfo(state.campaignInfo);
-            const campaignName = campaignInfo.name;
-            const campaignID = campaignInfo.id;
-            const campaignType = campaignInfo.type;
-            const campaignCountry = campaignInfo.country;
-
-            if (campaignName && campaignID) {
-                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' ' + campaignCountry : ''}`;
-                cellContent = `
-                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
-                        <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                            ${titleContent}
-                        </a>
-                    </h3>
-                    <p style="margin-bottom:10px;">${nl2br(state.textUnderTitle)}</p>
-                    <img src="${state.campaignInfo.match(/Image URL:\s*(https?:\/\/[^\s]+)/)?.[1]}" alt="${campaignName}" style="max-width:100%; margin-bottom:10px;">
-                    <p style="margin-bottom:10px;">${nl2br(state.campaignInfo.replace(/Image URL:\s*(https?:\/\/[^\s]+)/, '').trim())}</p>
-                    <p style="margin-bottom:10px;">${nl2br(state.campaignInfo.match(/Commission Details:([\s\S]*?)(?=Full details found here:|$)/)?.[1] || '')}</p>
-                    <p style="margin-bottom:10px;">Full details found here: <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:#dd1e31; text-decoration:none;">https://affiliates.maxbounty.com/campaign/${campaignID}</a></p>
-                `;
-            }
-        }
-
-        emailContent += `
-            <div style="border:1px solid #cccccc; padding:20px; border-radius:5px; background-color:#ffffff; transition:all 0.3s ease; opacity:0; animation:fadeIn 0.5s ease forwards;">
-                ${cellContent}
-            </div>
-        `;
-    }
-
-    emailContent += `
-                    </div>
-                    <p style="margin-top:20px;">${nl2br(afterLearnMore)}</p>
-                    <p style="margin-top:20px;">Best Regards,<br>The MaxBounty Team</p>
-                </div>
-            </div>
-        </div>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body style="margin:0; padding:0; background-color:#F2F2F2;">
+    <center>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#F2F2F2">
+            <tr>
+                <td align="center" valign="top">
+                    <table border="0" cellpadding="0" cellspacing="0" width="${totalWidth}" style="max-width:${totalWidth}px;">
+                        <tr>
+                            <td align="left" valign="top" style="padding:20px; font-family:Arial, sans-serif; color:#333333;">
+                                <p style="font-size:14px; margin-bottom:20px;">#firstName#,</p>
+                                <p style="font-size:14px; margin-bottom:20px;">${textAboveCampaigns}</p>
+                                ${campaignsHtml}
+                                <p style="font-size:14px; margin-top:20px;">${afterLearnMore}</p>
+                                <p style="font-size:14px; margin-top:20px;">If you have any questions, please contact your Affiliate Manager.</p>
+                                <p style="font-size:14px; margin-top:20px;">Thanks,</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html>
     `;
 
     document.getElementById('output').innerHTML = emailContent;
@@ -821,7 +789,7 @@ function generateEmail() {
             if (campaignName && campaignID) {
                 const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' ' + campaignCountry : ''}`;
                 cellContent = `
-                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
+                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
                             ${titleContent}
                         </a>
@@ -838,7 +806,7 @@ function generateEmail() {
         }
 
         campaignsHtml += `
-            <td width="${cellWidth}" valign="top" style="padding:10px; ${priorityStyle} ${highlightStyle}">
+            <td width="${cellWidth}" valign="top" style="padding:10px; ${priorityStyle} ${highlightStyle} word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                 ${cellContent}
             </td>
         `;
@@ -851,36 +819,36 @@ function generateEmail() {
     campaignsHtml += '</table>';
 
     const htmlOutput = `
-    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    <html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>${subjectTitle}</title>
-    </head>
-    <body style="margin:0; padding:0; background-color:#F2F2F2;">
-        <center>
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#F2F2F2">
-                <tr>
-                    <td align="center" valign="top">
-                        <table border="0" cellpadding="0" cellspacing="0" width="${totalWidth}" style="max-width:${totalWidth}px;">
-                            <tr>
-                                <td align="left" valign="top" style="padding:20px; font-family:Arial, sans-serif; color:#333333;">
-                                    <p style="font-size:16px; margin-bottom:20px;">${subjectTitle}</p>
-                                    <p style="font-size:14px; margin-bottom:20px;">#firstName#,</p>
-                                    <p style="font-size:14px; margin-bottom:20px;">${textAboveCampaigns}</p>
-                                    ${campaignsHtml}
-                                    <p style="font-size:14px; margin-top:20px;">${afterLearnMore}</p>
-                                    <p style="font-size:14px; margin-top:20px;">If you have any questions, please contact your Affiliate Manager.</p>
-                                    <p style="font-size:14px; margin-top:20px;">Thanks,</p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </center>
-    </body>
-    </html>
+${subjectTitle}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body style="margin:0; padding:0; background-color:#F2F2F2;">
+    <center>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#F2F2F2">
+            <tr>
+                <td align="center" valign="top">
+                    <table border="0" cellpadding="0" cellspacing="0" width="${totalWidth}" style="max-width:${totalWidth}px;">
+                        <tr>
+                            <td align="left" valign="top" style="padding:20px; font-family:Arial, sans-serif; color:#333333;">
+                                <p style="font-size:14px; margin-bottom:20px;">#firstName#,</p>
+                                <p style="font-size:14px; margin-bottom:20px;">${textAboveCampaigns}</p>
+                                ${campaignsHtml}
+                                <p style="font-size:14px; margin-top:20px;">${afterLearnMore}</p>
+                                <p style="font-size:14px; margin-top:20px;">If you have any questions, please contact your Affiliate Manager.</p>
+                                <p style="font-size:14px; margin-top:20px;">Thanks,</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html>
     `;
 
     console.log('Final HTML output:', htmlOutput);
