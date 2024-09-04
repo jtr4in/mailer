@@ -564,26 +564,119 @@ function extractCampaignInfo(campaignInfo) {
         if (parts.length >= 3) {
             campaignName = parts[0].trim();
             campaignType = parts[1].trim();
-            const countryMatch = parts[2].match(/\(([^)]+)\)/);
-            if (countryMatch) {
-                campaignCountry = countryMatch[1].trim();
+            const countryAndId = parts[2].trim();
+            const countryIdMatch = countryAndId.match(/(.*?)\s*-?\s*ID:\s*(\d+)/);
+            if (countryIdMatch) {
+                campaignCountry = countryIdMatch[1].trim();
+                campaignID = countryIdMatch[2];
+            } else {
+                campaignCountry = countryAndId;
             }
         }
     }
 
-    // Extract ID from the text
-    const idMatch = campaignInfo.match(/ID:\s*(\d+)/);
-    if (idMatch) {
-        campaignID = idMatch[1];
+    // If ID wasn't found in the first line, try to extract it from the rest of the text
+    if (!campaignID) {
+        const idMatch = campaignInfo.match(/ID:\s*(\d+)/);
+        if (idMatch) {
+            campaignID = idMatch[1];
+        }
     }
 
     return { 
         name: campaignName || 'Unknown Campaign', 
-        id: campaignID || 'Unknown ID', 
-        type: campaignType || 'Unknown Type', 
-        country: campaignCountry || 'Unknown Country' 
+        id: campaignID || '', 
+        type: campaignType || '', 
+        country: campaignCountry || '' // Changed from 'Unknown Country' to ''
     };
 }
+
+function generateEmail() {
+    const subjectTitle = document.getElementById('useAutoSubject').checked
+        ? document.getElementById('autoSubjectSelect').value
+        : document.getElementById('subjectTitle').value;
+
+    const textAboveCampaigns = document.getElementById('textAboveCampaigns').value;
+    const afterLearnMore = document.getElementById('afterLearnMore').value;
+    const numCampaigns = parseInt(document.getElementById('numCampaigns').value);
+    const columns = parseInt(document.getElementById('columns').value);
+    const noThumbnails = document.getElementById('noThumbnails').checked;
+
+    let emailContent = '';
+
+    // Replace {campaign} in subject line
+    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name}${campaignInfo.type ? ' - ' + campaignInfo.type : ''}${campaignInfo.country ? ' ' + campaignInfo.country : ''}`);
+    console.log('Final subject title:', subjectTitle);
+
+    emailContent += `
+        <div style="background-color:#f0f0f0; padding:20px;">
+            <div style="max-width:600px; margin:0 auto; background-color:#ffffff; padding:20px; border-radius:5px;">
+                <h2 style="color:#dd1e31; text-align:center; margin-bottom:30px;">${subjectTitle}</h2>
+                <div style="font-size:14px; line-height:1.6;">
+                    <p style="margin-bottom:20px;">${nl2br(textAboveCampaigns)}</p>
+                    <div style="display:grid; grid-template-columns:repeat(${columns}, 1fr); gap:30px;">
+    `;
+
+    for (let i = 0; i < numCampaigns; i++) {
+        const state = campaignState[i];
+        let cellContent = '';
+
+        if (state.isCustom) {
+            cellContent = `
+                <div style="border:1px solid #cccccc; padding:20px; border-radius:5px; background-color:#ffffff; transition:all 0.3s ease; opacity:0; animation:fadeIn 0.5s ease forwards;">
+                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
+                        <a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                            ${state.customTitle}
+                        </a>
+                    </h3>
+                    <p style="margin-bottom:10px;">${nl2br(state.customBodyText)}</p>
+                    <img src="${state.customImageUrl}" alt="${state.customTitle}" style="max-width:100%; margin-bottom:10px;">
+                </div>
+            `;
+        } else {
+            const campaignInfo = extractCampaignInfo(state.campaignInfo);
+            const campaignName = campaignInfo.name;
+            const campaignID = campaignInfo.id;
+            const campaignType = campaignInfo.type;
+            const campaignCountry = campaignInfo.country;
+
+            if (campaignName && campaignID) {
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' ' + campaignCountry : ''}`;
+                cellContent = `
+                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
+                        <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                            ${titleContent}
+                        </a>
+                    </h3>
+                    <p style="margin-bottom:10px;">${nl2br(state.textUnderTitle)}</p>
+                    <img src="${state.campaignInfo.match(/Image URL:\s*(https?:\/\/[^\s]+)/)?.[1]}" alt="${campaignName}" style="max-width:100%; margin-bottom:10px;">
+                    <p style="margin-bottom:10px;">${nl2br(state.campaignInfo.replace(/Image URL:\s*(https?:\/\/[^\s]+)/, '').trim())}</p>
+                    <p style="margin-bottom:10px;">${nl2br(state.campaignInfo.match(/Commission Details:([\s\S]*?)(?=Full details found here:|$)/)?.[1] || '')}</p>
+                    <p style="margin-bottom:10px;">Full details found here: <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:#dd1e31; text-decoration:none;">https://affiliates.maxbounty.com/campaign/${campaignID}</a></p>
+                `;
+            }
+        }
+
+        emailContent += `
+            <div style="border:1px solid #cccccc; padding:20px; border-radius:5px; background-color:#ffffff; transition:all 0.3s ease; opacity:0; animation:fadeIn 0.5s ease forwards;">
+                ${cellContent}
+            </div>
+        `;
+    }
+
+    emailContent += `
+                    </div>
+                    <p style="margin-top:20px;">${nl2br(afterLearnMore)}</p>
+                    <p style="margin-top:20px;">Best Regards,<br>The MaxBounty Team</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('output').innerHTML = emailContent;
+    document.getElementById('copyHtml').style.display = 'block';
+}
+
 function nl2br(str) {
     return str.replace(/\n/g, "<br>");
 }
@@ -670,7 +763,7 @@ function generateEmail() {
     console.log('Campaign info:', campaignInfo);
 
     // Replace {campaign} in subject line
-    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} - ${campaignInfo.type} (${campaignInfo.country})`);
+    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name}${campaignInfo.type ? ' - ' + campaignInfo.type : ''}${campaignInfo.country ? ' ' + campaignInfo.country : ''}`);
     console.log('Final subject title:', subjectTitle);
 
     const totalWidth = 600;
@@ -726,7 +819,7 @@ function generateEmail() {
             }
 
             if (campaignName && campaignID) {
-                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} - ${campaignType} (${campaignCountry})`;
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' ' + campaignCountry : ''}`;
                 cellContent = `
                     <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px;">
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
