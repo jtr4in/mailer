@@ -256,7 +256,7 @@
     <form id="emailBuilderForm">
         <div class="checkbox-container">
             <input type="checkbox" id="useAutoSubject" name="useAutoSubject" checked>
-            <label for="useAutoSubject" class="tooltip">Use Auto Email Subject Title
+            <label for="useAutoSubject" class="tooltip"> Auto Subject Title
                 <span class="tooltiptext">Choose from predefined subject titles</span>
             </label>
         </div>
@@ -267,7 +267,7 @@
         </div>
 
         <div id="autoSubjectContainer">
-            <label for="autoSubjectSelect">Select Subject Title:</label>
+        
             <select id="autoSubjectSelect" name="autoSubjectSelect">
                 <option value="">Select a subject title</option>
                 <option value="Updates and Announcements for {campaign}">Updates and Announcements for {campaign}</option>
@@ -289,18 +289,18 @@
         <!-- New checkbox and dropdown for Auto Email Text Above All -->
         <div class="checkbox-container">
             <input type="checkbox" id="useAutoTextAbove" name="useAutoTextAbove" checked>
-            <label for="useAutoTextAbove" class="tooltip">Use Auto Email Text Above All
+            <label for="useAutoTextAbove" class="tooltip">Auto Email Text Before Campaigns
                 <span class="tooltiptext">Choose from predefined text options</span>
             </label>
         </div>
 
         <div id="textAboveContainer" style="display: none;">
-            <label for="textAboveCampaigns">Text Above All Campaigns:</label>
+           
             <textarea id="textAboveCampaigns" placeholder="Enter text to appear above all campaigns" rows="3" style="width: 100%; margin-bottom: 20px;"></textarea>
         </div>
 
         <div id="autoTextAboveContainer">
-            <label for="autoTextAboveSelect">Select Text Above All:</label>
+            
             <select id="autoTextAboveSelect" name="autoTextAboveSelect">
                 <option value="">Select a text option</option>
                 <option value="We have some exciting updates and opportunities for you today. Please review the following campaigns:">We have some exciting updates and opportunities for you today. Please review the following campaigns:</option>
@@ -347,18 +347,18 @@
         <!-- New checkbox and dropdown for Auto Text Before Sign Off -->
         <div class="checkbox-container">
             <input type="checkbox" id="useAutoTextBeforeSignOff" name="useAutoTextBeforeSignOff" checked>
-            <label for="useAutoTextBeforeSignOff" class="tooltip">Use Auto Text Before Sign Off
+            <label for="useAutoTextBeforeSignOff" class="tooltip">Text After Campaigns
                 <span class="tooltiptext">Choose from predefined text options</span>
             </label>
         </div>
 
         <div id="textBeforeSignOffContainer" style="display: none;">
-            <label for="afterLearnMore">Text before sign off:</label>
-            <textarea id="afterLearnMore" name="afterLearnMore" rows="3" placeholder="Enter text to appear before the sign off"></textarea>
+            <label for="afterLearnMore">Text after campaigns:</label>
+            <textarea id="afterLearnMore" name="afterLearnMore" rows="3" placeholder="Enter text to appear after the campaigns"></textarea>
         </div>
 
         <div id="autoTextBeforeSignOffContainer">
-            <label for="autoTextBeforeSignOffSelect">Select Text Before Sign Off:</label>
+           
             <select id="autoTextBeforeSignOffSelect" name="autoTextBeforeSignOffSelect">
                 <option value="">Select a text option</option>
                 <option value="Don't miss out on these great opportunities. Start promoting today!">Don't miss out on these great opportunities. Start promoting today!</option>
