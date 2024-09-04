@@ -278,7 +278,7 @@
                 <option value="Promotions and Opportunities for {campaign}">Promotions and Opportunities for {campaign}</option>
                 <option value="Boost Your Earnings with {campaign}">Boost Your Earnings with {campaign}</option>
                 <option value="Limited-Time Bonus on {campaign}">Limited-Time Bonus on {campaign}</option>
-                <option value="Holiday Prep: {campaign}">Holiday Prep: {campaign}</option>
+                <option value="Holiday Prep: {campaign}">Holiday Prep: {campaign} Campaigns</option>
                 <option value="Resources and Tools for {campaign}">Resources and Tools for {campaign}</option>
                 <option value="New Resources Available for {campaign}">New Resources Available for {campaign}</option>
                 <option value="Exclusive Early Access to {campaign}">Exclusive Early Access to {campaign}</option>
@@ -286,8 +286,29 @@
             </select>
         </div>
 
-        <label for="textAboveCampaigns">Text Above All Campaigns:</label>
-        <textarea id="textAboveCampaigns" placeholder="Enter text to appear above all campaigns" rows="3" style="width: 100%; margin-bottom: 20px;"></textarea>
+        <!-- New checkbox and dropdown for Auto Email Text Above All -->
+        <div class="checkbox-container">
+            <input type="checkbox" id="useAutoTextAbove" name="useAutoTextAbove" checked>
+            <label for="useAutoTextAbove" class="tooltip">Use Auto Email Text Above All
+                <span class="tooltiptext">Choose from predefined text options</span>
+            </label>
+        </div>
+
+        <div id="textAboveContainer" style="display: none;">
+            <label for="textAboveCampaigns">Text Above All Campaigns:</label>
+            <textarea id="textAboveCampaigns" placeholder="Enter text to appear above all campaigns" rows="3" style="width: 100%; margin-bottom: 20px;"></textarea>
+        </div>
+
+        <div id="autoTextAboveContainer">
+            <label for="autoTextAboveSelect">Select Text Above All:</label>
+            <select id="autoTextAboveSelect" name="autoTextAboveSelect">
+                <option value="">Select a text option</option>
+                <option value="We have some exciting updates and opportunities for you today. Please review the following campaigns:">We have some exciting updates and opportunities for you today. Please review the following campaigns:</option>
+                <option value="Check out these hot campaigns that are performing well for our affiliates:">Check out these hot campaigns that are performing well for our affiliates:</option>
+                <option value="We've handpicked these campaigns just for you based on your past performance:">We've handpicked these campaigns just for you based on your past performance:</option>
+                <option value="Here are some of our top-converting offers that you should consider promoting:">Here are some of our top-converting offers that you should consider promoting:</option>
+            </select>
+        </div>
 
         <div class="form-row">
             <div>
@@ -323,17 +344,37 @@
 
         <div id="campaignInputs" class="campaign-grid"></div>
 
-        <label for="afterLearnMore">Text before sign off:</label>
-        <textarea id="afterLearnMore" name="afterLearnMore" rows="3" placeholder="Enter text to appear before the sign off"></textarea>
+        <!-- New checkbox and dropdown for Auto Text Before Sign Off -->
+        <div class="checkbox-container">
+            <input type="checkbox" id="useAutoTextBeforeSignOff" name="useAutoTextBeforeSignOff" checked>
+            <label for="useAutoTextBeforeSignOff" class="tooltip">Use Auto Text Before Sign Off
+                <span class="tooltiptext">Choose from predefined text options</span>
+            </label>
+        </div>
 
-      <div class="form-row">  <button type="submit">Generate Email</button>  
-				<button id="copyHtml" style="display: none;">Copy HTML</button>
+        <div id="textBeforeSignOffContainer" style="display: none;">
+            <label for="afterLearnMore">Text before sign off:</label>
+            <textarea id="afterLearnMore" name="afterLearnMore" rows="3" placeholder="Enter text to appear before the sign off"></textarea>
+        </div>
+
+        <div id="autoTextBeforeSignOffContainer">
+            <label for="autoTextBeforeSignOffSelect">Select Text Before Sign Off:</label>
+            <select id="autoTextBeforeSignOffSelect" name="autoTextBeforeSignOffSelect">
+                <option value="">Select a text option</option>
+                <option value="Don't miss out on these great opportunities. Start promoting today!">Don't miss out on these great opportunities. Start promoting today!</option>
+                <option value="Remember, our team is here to support you. Reach out if you need any assistance.">Remember, our team is here to support you. Reach out if you need any assistance.</option>
+                <option value="Stay tuned for more updates and exciting campaigns coming your way soon.">Stay tuned for more updates and exciting campaigns coming your way soon.</option>
+                <option value="Thank you for your continued partnership. Let's make this a successful month together!">Thank you for your continued partnership. Let's make this a successful month together!</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <button type="submit">Generate Email</button>  
+            <button id="copyHtml" style="display: none;">Copy HTML</button>
+        </div>
     </form>
-	</div>
 
     <div id="output"></div>
-   
-
 
     <script>
 	let campaignState = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
@@ -387,6 +428,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('useAutoSubject').addEventListener('change', function() {
         document.getElementById('subjectTitleContainer').style.display = this.checked ? 'none' : 'block';
         document.getElementById('autoSubjectContainer').style.display = this.checked ? 'block' : 'none';
+    });
+
+    // New event listener for Auto Text Above checkbox
+    document.getElementById('useAutoTextAbove').addEventListener('change', function() {
+        document.getElementById('textAboveContainer').style.display = this.checked ? 'none' : 'block';
+        document.getElementById('autoTextAboveContainer').style.display = this.checked ? 'block' : 'none';
+    });
+
+    // New event listener for Auto Text Before Sign Off checkbox
+    document.getElementById('useAutoTextBeforeSignOff').addEventListener('change', function() {
+        document.getElementById('textBeforeSignOffContainer').style.display = this.checked ? 'none' : 'block';
+        document.getElementById('autoTextBeforeSignOffContainer').style.display = this.checked ? 'block' : 'none';
     });
 
     document.getElementById('numCampaigns').addEventListener('change', function() {
@@ -552,6 +605,7 @@ function extractCampaignInfo(campaignInfo) {
     let campaignID = '';
     let campaignType = '';
     let campaignCountry = '';
+    let commissionDetails = '';
 
     const lines = campaignInfo.split('\n');
     if (lines.length > 0) {
@@ -579,11 +633,32 @@ function extractCampaignInfo(campaignInfo) {
         }
     }
 
+    // Extract and reformat Commission Details
+    const commissionMatch = campaignInfo.match(/Commission Details:\s*(.*)/);
+    if (commissionMatch) {
+        let commissionDetails = commissionMatch[1];
+        // Reformat the commission details
+        const parts = commissionDetails.split(':');
+        if (parts.length === 2) {
+            const action = parts[0].trim();
+            const amount = parts[1].replace('per lead', '').trim();
+            commissionDetails = `${amount} per ${action}`;
+        }
+        return { 
+            name: campaignName || 'Unknown Campaign', 
+            id: campaignID || '', 
+            type: campaignType || '', 
+            country: campaignCountry || '', 
+            commissionDetails: commissionDetails || ''
+        };
+    }
+
     return { 
         name: campaignName || 'Unknown Campaign', 
         id: campaignID || '', 
         type: campaignType || '', 
-        country: campaignCountry || ''
+        country: campaignCountry || '', 
+        commissionDetails: commissionDetails || ''
     };
 }
 
@@ -592,8 +667,16 @@ function generateEmail() {
         ? document.getElementById('autoSubjectSelect').value
         : document.getElementById('subjectTitle').value;
 
-    const textAboveCampaigns = document.getElementById('textAboveCampaigns').value;
-    const afterLearnMore = document.getElementById('afterLearnMore').value;
+    const useAutoTextAbove = document.getElementById('useAutoTextAbove').checked;
+    const textAboveCampaigns = useAutoTextAbove
+        ? document.getElementById('autoTextAboveSelect').value
+        : document.getElementById('textAboveCampaigns').value;
+
+    const useAutoTextBeforeSignOff = document.getElementById('useAutoTextBeforeSignOff').checked;
+    const afterLearnMore = useAutoTextBeforeSignOff
+        ? document.getElementById('autoTextBeforeSignOffSelect').value
+        : document.getElementById('afterLearnMore').value;
+
     const numCampaigns = parseInt(document.getElementById('numCampaigns').value);
     const columns = parseInt(document.getElementById('columns').value);
     const noThumbnails = document.getElementById('noThumbnails').checked;
@@ -683,12 +766,10 @@ function generateEmail() {
     const numCampaigns = parseInt(numCampaignsElement.value);
     console.log('Number of campaigns:', numCampaigns);
 
-    const afterLearnMoreElement = document.getElementById('afterLearnMore');
-    if (!afterLearnMoreElement) {
-        console.error('afterLearnMore element not found');
-        return;
-    }
-    const afterLearnMore = nl2br(afterLearnMoreElement.value);
+    const useAutoTextBeforeSignOff = document.getElementById('useAutoTextBeforeSignOff').checked;
+    const afterLearnMore = useAutoTextBeforeSignOff
+        ? document.getElementById('autoTextBeforeSignOffSelect').value
+        : document.getElementById('afterLearnMore').value;
     console.log('Text before sign off:', afterLearnMore);
 
     const noThumbnailsCheckbox = document.getElementById('noThumbnails');
@@ -713,11 +794,14 @@ function generateEmail() {
         return;
     }
 
-    textAboveCampaigns = nl2br(document.getElementById('textAboveCampaigns').value);
+    const useAutoTextAbove = document.getElementById('useAutoTextAbove').checked;
+    const textAboveCampaigns = useAutoTextAbove
+        ? document.getElementById('autoTextAboveSelect').value
+        : document.getElementById('textAboveCampaigns').value;
     console.log('Text above campaigns:', textAboveCampaigns);
 
     // Extract campaign info from the first non-custom campaign
-    let campaignInfo = { name: '', id: '', type: '', country: '' };
+    let campaignInfo = { name: '', id: '', type: '', country: '', commissionDetails: '' };
     for (let i = 0; i < numCampaigns; i++) {
         if (!campaignState[i].isCustom) {
             campaignInfo = extractCampaignInfo(campaignState[i].campaignInfo);
@@ -771,6 +855,7 @@ function generateEmail() {
             let campaignType = campaignInfo.type;
             let campaignCountry = campaignInfo.country;
             let landingPage = '';
+            let commissionDetails = campaignInfo.commissionDetails;
 
             const urlMatch = (state.campaignInfo || '').match(/(https:\/\/maxbounty\.com\/getlp\.asp\?m=\d+&o=\d+&l=\d+&s=)full/);
             if (urlMatch) {
@@ -795,6 +880,7 @@ function generateEmail() {
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
                             <img src="${landingPage}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto;" />
                         </a>
+                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${commissionDetails}</p>
                     ` : ''}
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
                 `;
