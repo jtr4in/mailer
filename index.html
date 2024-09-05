@@ -270,19 +270,27 @@
         
             <select id="autoSubjectSelect" name="autoSubjectSelect">
                 <option value="">Select a subject title</option>
+                <optgroup label="Campaign Updates" style="font-weight: bold;">
+                </optgroup>
                 <option value="Updates and Announcements for {campaign}">Updates and Announcements for {campaign}</option>
                 <option value="Important Updates: Changes to {campaign}">Important Updates: Changes to {campaign}</option>
                 <option value="Action Required: Policy Update for {campaign}">Action Required: Policy Update for {campaign}</option>
-                <option value="Scheduled Maintenance: {campaign} Downtime">Scheduled Maintenance: {campaign} Downtime</option>
-                <option value="New Launch: Promote {campaign} ">New Launch: Promote {campaign} Now</option>
+                <option value="Scheduled Maintenance: {campaign}">Scheduled Maintenance: {campaign}</option>
+                <optgroup label="Promotions" style="font-weight: bold;">
+                </optgroup>
+                <option value="New Launch: Promote {campaign}">New Launch: Promote {campaign}</option>
                 <option value="Promotions and Opportunities for {campaign}">Promotions and Opportunities for {campaign}</option>
                 <option value="Boost Your Earnings with {campaign}">Boost Your Earnings with {campaign}</option>
                 <option value="Limited-Time Bonus on {campaign}">Limited-Time Bonus on {campaign}</option>
+                <optgroup label="Seasonal" style="font-weight: bold;">
+                </optgroup>
                 <option value="Holiday Prep: {campaign}">Holiday Prep: {campaign} Campaigns</option>
+                <optgroup label="Resources" style="font-weight: bold;">
+                </optgroup>
                 <option value="Resources and Tools for {campaign}">Resources and Tools for {campaign}</option>
                 <option value="New Resources Available for {campaign}">New Resources Available for {campaign}</option>
                 <option value="Exclusive Early Access to {campaign}">Exclusive Early Access to {campaign}</option>
-                <option value="Top Tips for Maximizing {campaign} ">Top Tips for Maximizing {campaign} </option>
+                <option value="Top Tips for Maximizing {campaign}">Top Tips for Maximizing {campaign}</option>
             </select>
         </div>
 
@@ -300,13 +308,23 @@
         </div>
 
         <div id="autoTextAboveContainer">
-            
             <select id="autoTextAboveSelect" name="autoTextAboveSelect">
                 <option value="">Select a text option</option>
+                
+                <optgroup label="General Updates" style="font-weight: bold;">
+                </optgroup>
                 <option value="We have some exciting updates and opportunities for you today. Please review the following campaigns:">We have some exciting updates and opportunities for you today. Please review the following campaigns:</option>
                 <option value="Check out these hot campaigns that are performing well for our affiliates:">Check out these hot campaigns that are performing well for our affiliates:</option>
+                
+                <optgroup label="Personalized Recommendations" style="font-weight: bold;">
+                </optgroup>
                 <option value="We've handpicked these campaigns just for you based on your past performance:">We've handpicked these campaigns just for you based on your past performance:</option>
                 <option value="Here are some of our top-converting offers that you should consider promoting:">Here are some of our top-converting offers that you should consider promoting:</option>
+                
+                <optgroup label="Seasonal" style="font-weight: bold;">
+                </optgroup>
+                <option value="As we approach the holiday season, here are some campaigns to focus on:">As we approach the holiday season, here are some campaigns to focus on:</option>
+                <option value="Get ready for back-to-school season with these high-performing campaigns:">Get ready for back-to-school season with these high-performing campaigns:</option>
             </select>
         </div>
 
@@ -358,13 +376,28 @@
         </div>
 
         <div id="autoTextBeforeSignOffContainer">
-           
             <select id="autoTextBeforeSignOffSelect" name="autoTextBeforeSignOffSelect">
                 <option value="">Select a text option</option>
+                
+                <optgroup label="Call to Action" style="font-weight: bold;">
+                </optgroup>
                 <option value="Don't miss out on these great opportunities. Start promoting today!">Don't miss out on these great opportunities. Start promoting today!</option>
+                <option value="These campaigns are in high demand. Log in to your account and start promoting now!">These campaigns are in high demand. Log in to your account and start promoting now!</option>
+                
+                <optgroup label="Support" style="font-weight: bold;">
+                </optgroup>
                 <option value="Remember, our team is here to support you. Reach out if you need any assistance.">Remember, our team is here to support you. Reach out if you need any assistance.</option>
+                <option value="If you need any help with these campaigns, don't hesitate to contact your affiliate manager.">If you need any help with these campaigns, don't hesitate to contact your affiliate manager.</option>
+                
+                <optgroup label="Future Updates" style="font-weight: bold;">
+                </optgroup>
                 <option value="Stay tuned for more updates and exciting campaigns coming your way soon.">Stay tuned for more updates and exciting campaigns coming your way soon.</option>
+                <option value="We're constantly adding new campaigns, so check your account regularly for the latest opportunities.">We're constantly adding new campaigns, so check your account regularly for the latest opportunities.</option>
+                
+                <optgroup label="Appreciation" style="font-weight: bold;">
+                </optgroup>
                 <option value="Thank you for your continued partnership. Let's make this a successful month together!">Thank you for your continued partnership. Let's make this a successful month together!</option>
+                <option value="We appreciate your hard work and dedication. Keep up the great performance!">We appreciate your hard work and dedication. Keep up the great performance!</option>
             </select>
         </div>
 
@@ -458,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('copyHtml').addEventListener('click', function() {
         const htmlContent = document.getElementById('output').innerHTML;
         navigator.clipboard.writeText(htmlContent).then(() => {
-            alert('HTML copied to clipboard!');
+
         });
     });
 
@@ -512,6 +545,10 @@ function createCampaignInput(index) {
                     <input type="checkbox" id="hideRateStandard${index}" name="hideRateStandard${index}" ${state.hideRate ? 'checked' : ''}>
                     <label for="hideRateStandard${index}">Hide Rate</label>
                 </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="hideThumbnailStandard${index}" name="hideThumbnailStandard${index}" ${state.hideThumbnail ? 'checked' : ''}>
+                    <label for="hideThumbnailStandard${index}">Hide Thumbnail</label>
+                </div>
                 <label for="priorityLevel${index}">Priority Level:</label>
                 <select id="priorityLevel${index}" name="priorityLevel${index}">
                     <option value="None" ${state.priorityLevel === 'None' ? 'selected' : ''}>None</option>
@@ -539,6 +576,10 @@ function createCampaignInput(index) {
                 <div class="checkbox-container">
                     <input type="checkbox" id="hideRateCustom${index}" name="hideRateCustom${index}" ${state.hideRate ? 'checked' : ''}>
                     <label for="hideRateCustom${index}">Hide Rate</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="hideThumbnailCustom${index}" name="hideThumbnailCustom${index}" ${state.hideThumbnail ? 'checked' : ''}>
+                    <label for="hideThumbnailCustom${index}">Hide Thumbnail</label>
                 </div>
             </div>
         </div>
@@ -577,6 +618,9 @@ function updateCampaignState(newNumCampaigns) {
             const hideRate = isCustom
                 ? document.getElementById(`hideRateCustom${i}`).checked
                 : document.getElementById(`hideRateStandard${i}`).checked;
+            const hideThumbnail = isCustom
+                ? document.getElementById(`hideThumbnailCustom${i}`).checked
+                : document.getElementById(`hideThumbnailStandard${i}`).checked;
             campaignState[i] = isCustom ? {
                 isCustom: true,
                 customTitle: document.getElementById(`customTitle${i}`)?.value || '',
@@ -584,7 +628,8 @@ function updateCampaignState(newNumCampaigns) {
                 customImageUrl: document.getElementById(`customImageUrl${i}`)?.value || '',
                 customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
                 highlight: highlight,
-                hideRate: hideRate
+                hideRate: hideRate,
+                hideThumbnail: hideThumbnail
             } : {
                 isCustom: false,
                 updateType: document.getElementById(`updateType${i}`)?.value || '',
@@ -593,7 +638,8 @@ function updateCampaignState(newNumCampaigns) {
                 textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
                 highlight: highlight,
                 priorityLevel: document.getElementById(`priorityLevel${i}`)?.value || 'None',
-                hideRate: hideRate
+                hideRate: hideRate,
+                hideThumbnail: hideThumbnail
             };
         } else {
             console.error(`customToggle${i} not found`);
@@ -855,7 +901,7 @@ function generateEmail() {
                     ${titleContent}
                 </h3>
                 <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customBodyText)}</p>
-                ${!noThumbnails && state.customImageUrl ? `
+                ${!noThumbnails && !state.hideThumbnail && state.customImageUrl ? `
                     <a href="${state.customLearnMoreUrl || '#'}">
                         <img src="${state.customImageUrl}" alt="${state.customTitle}" width="${cellWidth - 20}" style="display:block; margin:10px auto;" />
                     </a>
@@ -889,12 +935,12 @@ function generateEmail() {
                         </a>
                     </h3>
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
-                    ${!noThumbnails && landingPage ? `
+                    ${!noThumbnails && !state.hideThumbnail && landingPage ? `
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
                             <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
                         </a>
-                        ${!state.hideRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${commissionDetails}</p>` : ''}
                     ` : ''}
+                    ${!state.hideRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${commissionDetails}</p>` : ''}
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
                 `;
             }
