@@ -273,8 +273,8 @@
                 <option value="Updates and Announcements for {campaign}">Updates and Announcements for {campaign}</option>
                 <option value="Important Updates: Changes to {campaign}">Important Updates: Changes to {campaign}</option>
                 <option value="Action Required: Policy Update for {campaign}">Action Required: Policy Update for {campaign}</option>
-                <option value="Scheduled Maintenance: {campaign}">Scheduled Maintenance: {campaign} </option>
-                <option value="New Launch: Promote {campaign} ">New Launch: Promote {campaign} </option>
+                <option value="Scheduled Maintenance: {campaign} Downtime">Scheduled Maintenance: {campaign} Downtime</option>
+                <option value="New Launch: Promote {campaign} ">New Launch: Promote {campaign} Now</option>
                 <option value="Promotions and Opportunities for {campaign}">Promotions and Opportunities for {campaign}</option>
                 <option value="Boost Your Earnings with {campaign}">Boost Your Earnings with {campaign}</option>
                 <option value="Limited-Time Bonus on {campaign}">Limited-Time Bonus on {campaign}</option>
@@ -878,7 +878,7 @@ function generateEmail() {
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
                     ${!noThumbnails && landingPage ? `
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
-                            <img src="${landingPage}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto;" />
+                            <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto;" />
                         </a>
                         <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${commissionDetails}</p>
                     ` : ''}
