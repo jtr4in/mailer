@@ -868,7 +868,7 @@ function generateEmail() {
             }
 
             if (campaignName && campaignID) {
-                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' ' + campaignCountry : ''}`;
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' - ' + campaignCountry : ''}`;
                 cellContent = `
                     <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
