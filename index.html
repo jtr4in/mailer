@@ -878,7 +878,7 @@ function generateEmail() {
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
                     ${!noThumbnails && landingPage ? `
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
-                            <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto;" />
+                            <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
                         </a>
                         <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${commissionDetails}</p>
                     ` : ''}
