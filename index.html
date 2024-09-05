@@ -508,6 +508,10 @@ function createCampaignInput(index) {
                     <input type="checkbox" id="highlightStandard${index}" name="highlightStandard${index}" ${state.highlight ? 'checked' : ''}>
                     <label for="highlightStandard${index}">Highlight Campaign</label>
                 </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="hideRateStandard${index}" name="hideRateStandard${index}" ${state.hideRate ? 'checked' : ''}>
+                    <label for="hideRateStandard${index}">Hide Rate</label>
+                </div>
                 <label for="priorityLevel${index}">Priority Level:</label>
                 <select id="priorityLevel${index}" name="priorityLevel${index}">
                     <option value="None" ${state.priorityLevel === 'None' ? 'selected' : ''}>None</option>
@@ -531,6 +535,10 @@ function createCampaignInput(index) {
                 <div class="checkbox-container">
                     <input type="checkbox" id="highlightCustom${index}" name="highlightCustom${index}" ${state.highlight ? 'checked' : ''}>
                     <label for="highlightCustom${index}">Highlight Campaign</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="hideRateCustom${index}" name="hideRateCustom${index}" ${state.hideRate ? 'checked' : ''}>
+                    <label for="hideRateCustom${index}">Hide Rate</label>
                 </div>
             </div>
         </div>
@@ -566,13 +574,17 @@ function updateCampaignState(newNumCampaigns) {
             const highlight = isCustom 
                 ? document.getElementById(`highlightCustom${i}`).checked
                 : document.getElementById(`highlightStandard${i}`).checked;
+            const hideRate = isCustom
+                ? document.getElementById(`hideRateCustom${i}`).checked
+                : document.getElementById(`hideRateStandard${i}`).checked;
             campaignState[i] = isCustom ? {
                 isCustom: true,
                 customTitle: document.getElementById(`customTitle${i}`)?.value || '',
                 customBodyText: document.getElementById(`customBodyText${i}`)?.value || '',
                 customImageUrl: document.getElementById(`customImageUrl${i}`)?.value || '',
                 customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
-                highlight: highlight
+                highlight: highlight,
+                hideRate: hideRate
             } : {
                 isCustom: false,
                 updateType: document.getElementById(`updateType${i}`)?.value || '',
@@ -580,7 +592,8 @@ function updateCampaignState(newNumCampaigns) {
                 customText: document.getElementById(`customText${i}`)?.value || '',
                 textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
                 highlight: highlight,
-                priorityLevel: document.getElementById(`priorityLevel${i}`)?.value || 'None'
+                priorityLevel: document.getElementById(`priorityLevel${i}`)?.value || 'None',
+                hideRate: hideRate
             };
         } else {
             console.error(`customToggle${i} not found`);
@@ -880,7 +893,7 @@ function generateEmail() {
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
                             <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
                         </a>
-                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${commissionDetails}</p>
+                        ${!state.hideRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${commissionDetails}</p>` : ''}
                     ` : ''}
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
                 `;
