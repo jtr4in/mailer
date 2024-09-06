@@ -691,20 +691,24 @@ function extractCampaignInfo(campaignInfo) {
         const firstLine = lines[0];
         const parts = firstLine.split(' - ');
         if (parts.length >= 3) {
-            // Extract campaign name (everything before the first dash)
             campaignName = parts[0].trim();
-            
-            // Extract country (content inside parentheses)
-            const countryMatch = firstLine.match(/\(([^)]+)\)/);
-            if (countryMatch) {
-                campaignCountry = countryMatch[1];
+            campaignType = parts[1].trim();
+            const countryAndId = parts[2].trim();
+            const countryIdMatch = countryAndId.match(/(.*?)\s*-?\s*ID:\s*(\d+)/);
+            if (countryIdMatch) {
+                campaignCountry = countryIdMatch[1].trim();
+                campaignID = countryIdMatch[2];
+            } else {
+                campaignCountry = countryAndId;
             }
-            
-            // Extract ID
-            const idMatch = firstLine.match(/ID:\s*(\d+)/);
-            if (idMatch) {
-                campaignID = idMatch[1];
-            }
+        }
+    }
+
+    // If ID wasn't found in the first line, try to extract it from the rest of the text
+    if (!campaignID) {
+        const idMatch = campaignInfo.match(/ID:\s*(\d+)/);
+        if (idMatch) {
+            campaignID = idMatch[1];
         }
     }
 
@@ -719,6 +723,13 @@ function extractCampaignInfo(campaignInfo) {
             const amount = parts[1].replace('per lead', '').trim();
             commissionDetails = `${amount} per ${action}`;
         }
+        return { 
+            name: campaignName || 'Unknown Campaign', 
+            id: campaignID || '', 
+            type: campaignType || '', 
+            country: campaignCountry || '', 
+            commissionDetails: commissionDetails || ''
+        };
     }
 
     return { 
@@ -936,7 +947,7 @@ function generateEmail() {
             }
 
             if (campaignName && campaignID) {
-                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignCountry ? ' (' + campaignCountry + ')' : ''}`;
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' - ' + campaignCountry : ''}`;
                 cellContent = `
                     <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
