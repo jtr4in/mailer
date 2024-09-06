@@ -395,28 +395,30 @@
 
         <div id="autoTextBeforeSignOffContainer">
             <select id="autoTextBeforeSignOffSelect" name="autoTextBeforeSignOffSelect">
-                <option value="">Select a text option</option>
-                
-                <optgroup label="Call to Action" style="font-weight: bold;">
-                </optgroup>
-                <option value="Don't miss out on these great opportunities. Start promoting today!">Don't miss out on these great opportunities. Start promoting today!</option>
-                <option value="These campaigns are in high demand. Log in to your account and start promoting now!">These campaigns are in high demand. Log in to your account and start promoting now!</option>
-                
-                <optgroup label="Support" style="font-weight: bold;">
-                </optgroup>
-                <option value="Remember, our team is here to support you. Reach out if you need any assistance.">Remember, our team is here to support you. Reach out if you need any assistance.</option>
-                <option value="If you need any help with these campaigns, don't hesitate to contact your affiliate manager.">If you need any help with these campaigns, don't hesitate to contact your affiliate manager.</option>
-                
-                <optgroup label="Future Updates" style="font-weight: bold;">
-                </optgroup>
-                <option value="Stay tuned for more updates and exciting campaigns coming your way soon.">Stay tuned for more updates and exciting campaigns coming your way soon.</option>
-                <option value="We're constantly adding new campaigns, so check your account regularly for the latest opportunities.">We're constantly adding new campaigns, so check your account regularly for the latest opportunities.</option>
-                
-                <optgroup label="Appreciation" style="font-weight: bold;">
-                </optgroup>
-                <option value="Thank you for your continued partnership. Let's make this a successful month together!">Thank you for your continued partnership. Let's make this a successful month together!</option>
-                <option value="We appreciate your hard work and dedication. Keep up the great performance!">We appreciate your hard work and dedication. Keep up the great performance!</option>
-            </select>
+    <option value="">Select a text option</option>
+    
+    <optgroup label="Call to Action" style="font-weight: bold;">
+    </optgroup>
+    <option value="Don't miss out on these great opportunities. Start promoting today!">Don't miss out on these great opportunities. Start promoting today!</option>
+    <option value="These campaigns are in high demand. Log in to your account and start promoting now!">These campaigns are in high demand. Log in to your account and start promoting now!</option>
+    
+    <optgroup label="Support" style="font-weight: bold;">
+    </optgroup>
+    <option value="Ensure you're up-to-date with all campaign guidelines and requirements.">Ensure you're up-to-date with all campaign guidelines and requirements.</option>
+    <option value="Be sure to review your campaign performance and optimize your promotions.">Be sure to review your campaign performance and optimize your promotions.</option>
+    
+   <optgroup label="Performance Reminders" style="font-weight: bold;">
+</optgroup>
+<option value="Keep an eye on your performance metrics to maximize results.">Keep an eye on your performance metrics to maximize results.</option>
+<option value="Don't forget to track your progress and adjust your strategies for better outcomes.">Don't forget to track your progress and adjust your strategies for better outcomes.</option>
+
+    
+    <optgroup label="Appreciation" style="font-weight: bold;">
+    </optgroup>
+    <option value="Thank you for your continued partnership. Let's make this a successful month together!">Thank you for your continued partnership. Let's make this a successful month together!</option>
+    <option value="We appreciate your hard work and dedication. Keep up the great performance!">We appreciate your hard work and dedication. Keep up the great performance!</option>
+</select>
+
         </div>
 
         <div class="form-row">
@@ -689,24 +691,20 @@ function extractCampaignInfo(campaignInfo) {
         const firstLine = lines[0];
         const parts = firstLine.split(' - ');
         if (parts.length >= 3) {
+            // Extract campaign name (everything before the first dash)
             campaignName = parts[0].trim();
-            campaignType = parts[1].trim();
-            const countryAndId = parts[2].trim();
-            const countryIdMatch = countryAndId.match(/(.*?)\s*-?\s*ID:\s*(\d+)/);
-            if (countryIdMatch) {
-                campaignCountry = countryIdMatch[1].trim();
-                campaignID = countryIdMatch[2];
-            } else {
-                campaignCountry = countryAndId;
+            
+            // Extract country (content inside parentheses)
+            const countryMatch = firstLine.match(/\(([^)]+)\)/);
+            if (countryMatch) {
+                campaignCountry = countryMatch[1];
             }
-        }
-    }
-
-    // If ID wasn't found in the first line, try to extract it from the rest of the text
-    if (!campaignID) {
-        const idMatch = campaignInfo.match(/ID:\s*(\d+)/);
-        if (idMatch) {
-            campaignID = idMatch[1];
+            
+            // Extract ID
+            const idMatch = firstLine.match(/ID:\s*(\d+)/);
+            if (idMatch) {
+                campaignID = idMatch[1];
+            }
         }
     }
 
@@ -721,13 +719,6 @@ function extractCampaignInfo(campaignInfo) {
             const amount = parts[1].replace('per lead', '').trim();
             commissionDetails = `${amount} per ${action}`;
         }
-        return { 
-            name: campaignName || 'Unknown Campaign', 
-            id: campaignID || '', 
-            type: campaignType || '', 
-            country: campaignCountry || '', 
-            commissionDetails: commissionDetails || ''
-        };
     }
 
     return { 
@@ -945,7 +936,7 @@ function generateEmail() {
             }
 
             if (campaignName && campaignID) {
-                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' - ' + campaignCountry : ''}`;
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignCountry ? ' (' + campaignCountry + ')' : ''}`;
                 cellContent = `
                     <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
