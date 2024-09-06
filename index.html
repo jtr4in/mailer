@@ -327,13 +327,19 @@
 
         <div id="autoTextAboveContainer">
             <select id="autoTextAboveSelect" name="autoTextAboveSelect">
-                <option value="">Select a text option</option>
-                
-                <optgroup label="General Updates" style="font-weight: bold;">
-                </optgroup>
-                <option value="We have some exciting updates and opportunities for you today. Please review the following campaigns:">We have some exciting updates and opportunities for you today. Please review the following campaigns:</option>
-                <option value="Check out these hot campaigns that are performing well for our affiliates:">Check out these hot campaigns that are performing well for our affiliates:</option>
-                
+    <option value="">Select a text option</option>
+    
+    <optgroup label="General Updates" style="font-weight: bold;">
+    </optgroup>
+    <option value="Important update for {campaign}:">Important update for {campaign}:</option>
+    <option value="Rate change alert: {campaign}">Rate change alert: {campaign}</option>
+    <option value="New restrictions for {campaign}:">New restrictions for {campaign}:</option>
+    <option value="{campaign} is now by request only.">{campaign} is now by request only.</option>
+    <option value="Payout structure adjusted for {campaign}:">Payout structure adjusted for {campaign}:</option>
+    <option value="New targeting options for {campaign}:">New targeting options for {campaign}:</option>
+    <option value="{campaign} has been paused.">{campaign} has been paused.</option>
+    <option value="Good news! {campaign} is back online.">Good news! {campaign} is back online.</option>
+    
                 <optgroup label="Personalized Recommendations" style="font-weight: bold;">
                 </optgroup>
                 <option value="We've handpicked these campaigns just for you based on your past performance:">We've handpicked these campaigns just for you based on your past performance:</option>
@@ -682,8 +688,8 @@ function initializeCampaignInputs() {
 function extractCampaignInfo(campaignInfo) {
     let campaignName = '';
     let campaignID = '';
-    let campaignType = '';
     let campaignCountry = '';
+    let conversionType = '';
     let commissionDetails = '';
 
     const lines = campaignInfo.split('\n');
@@ -692,14 +698,24 @@ function extractCampaignInfo(campaignInfo) {
         const parts = firstLine.split(' - ');
         if (parts.length >= 3) {
             campaignName = parts[0].trim();
-            campaignType = parts[1].trim();
             const countryAndId = parts[2].trim();
-            const countryIdMatch = countryAndId.match(/(.*?)\s*-?\s*ID:\s*(\d+)/);
-            if (countryIdMatch) {
-                campaignCountry = countryIdMatch[1].trim();
-                campaignID = countryIdMatch[2];
-            } else {
-                campaignCountry = countryAndId;
+            
+            // Extract country from within brackets
+            const countryMatch = countryAndId.match(/\(([^)]+)\)/);
+            if (countryMatch) {
+                campaignCountry = countryMatch[1].trim();
+            }
+            
+            // Extract ID
+            const idMatch = countryAndId.match(/ID:\s*(\d+)/);
+            if (idMatch) {
+                campaignID = idMatch[1];
+            }
+            
+            // Extract conversion type (everything before the brackets)
+            const conversionTypeMatch = countryAndId.match(/(.*?)\s*\(/);
+            if (conversionTypeMatch) {
+                conversionType = conversionTypeMatch[1].trim();
             }
         }
     }
@@ -715,7 +731,7 @@ function extractCampaignInfo(campaignInfo) {
     // Extract and reformat Commission Details
     const commissionMatch = campaignInfo.match(/Commission Details:\s*(.*)/);
     if (commissionMatch) {
-        let commissionDetails = commissionMatch[1];
+        commissionDetails = commissionMatch[1];
         // Reformat the commission details
         const parts = commissionDetails.split(':');
         if (parts.length === 2) {
@@ -723,20 +739,13 @@ function extractCampaignInfo(campaignInfo) {
             const amount = parts[1].replace('per lead', '').trim();
             commissionDetails = `${amount} per ${action}`;
         }
-        return { 
-            name: campaignName || 'Unknown Campaign', 
-            id: campaignID || '', 
-            type: campaignType || '', 
-            country: campaignCountry || '', 
-            commissionDetails: commissionDetails || ''
-        };
     }
 
     return { 
         name: campaignName || 'Unknown Campaign', 
         id: campaignID || '', 
-        type: campaignType || '', 
         country: campaignCountry || '', 
+        conversionType: conversionType || '',
         commissionDetails: commissionDetails || ''
     };
 }
@@ -763,7 +772,7 @@ function generateEmail() {
     let emailContent = '';
 
     // Replace {campaign} in subject line
-    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name}${campaignInfo.type ? ' - ' + campaignInfo.type : ''}${campaignInfo.country ? ' ' + campaignInfo.country : ''}`);
+    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} (${campaignInfo.country})`);
     console.log('Final subject title:', subjectTitle);
 
     emailContent += `
@@ -880,7 +889,7 @@ function generateEmail() {
     console.log('Text above campaigns:', textAboveCampaigns);
 
     // Extract campaign info from the first non-custom campaign
-    let campaignInfo = { name: '', id: '', type: '', country: '', commissionDetails: '' };
+    let campaignInfo = { name: '', id: '', country: '', commissionDetails: '' };
     for (let i = 0; i < numCampaigns; i++) {
         if (!campaignState[i].isCustom) {
             campaignInfo = extractCampaignInfo(campaignState[i].campaignInfo);
@@ -890,7 +899,7 @@ function generateEmail() {
     console.log('Campaign info:', campaignInfo);
 
     // Replace {campaign} in subject line
-    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name}${campaignInfo.type ? ' - ' + campaignInfo.type : ''}${campaignInfo.country ? ' ' + campaignInfo.country : ''}`);
+    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} (${campaignInfo.country})`);
     console.log('Final subject title:', subjectTitle);
 
     const totalWidth = 600;
@@ -931,7 +940,6 @@ function generateEmail() {
             const campaignInfo = extractCampaignInfo(state.campaignInfo || '');
             let campaignName = campaignInfo.name;
             let campaignID = campaignInfo.id;
-            let campaignType = campaignInfo.type;
             let campaignCountry = campaignInfo.country;
             let landingPage = '';
             let commissionDetails = campaignInfo.commissionDetails;
@@ -947,7 +955,7 @@ function generateEmail() {
             }
 
             if (campaignName && campaignID) {
-                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' - ' + campaignCountry : ''}`;
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignCountry})`;
                 cellContent = `
                     <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
