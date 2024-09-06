@@ -737,8 +737,14 @@ function extractCampaignInfo(campaignInfo) {
         const parts = commissionDetails.split(':');
         if (parts.length === 2) {
             const action = parts[0].trim();
-            const amount = parts[1].replace('per lead', '').trim();
-            commissionDetails = `${amount} per ${action}`;
+            let amount = parts[1].trim();
+            
+            // Remove 'of sale' if the amount is a percentage
+            if (amount.includes('%')) {
+                amount = amount.replace('of sale', '').trim();
+            }
+            
+            commissionDetails = `${amount} of ${action}`;
         }
     }
 
