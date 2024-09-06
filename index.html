@@ -268,30 +268,48 @@
 
         <div id="autoSubjectContainer">
         
-            <select id="autoSubjectSelect" name="autoSubjectSelect">
-                <option value="">Select a subject title</option>
-                <optgroup label="Campaign Updates" style="font-weight: bold;">
-                </optgroup>
-                <option value="Updates and Announcements for {campaign}">Updates and Announcements for {campaign}</option>
-                <option value="Important Updates: Changes to {campaign}">Important Updates: Changes to {campaign}</option>
-                <option value="Action Required: Policy Update for {campaign}">Action Required: Policy Update for {campaign}</option>
-                <option value="Scheduled Maintenance: {campaign}">Scheduled Maintenance: {campaign}</option>
-                <optgroup label="Promotions" style="font-weight: bold;">
-                </optgroup>
-                <option value="New Launch: Promote {campaign}">New Launch: Promote {campaign}</option>
-                <option value="Promotions and Opportunities for {campaign}">Promotions and Opportunities for {campaign}</option>
-                <option value="Boost Your Earnings with {campaign}">Boost Your Earnings with {campaign}</option>
-                <option value="Limited-Time Bonus on {campaign}">Limited-Time Bonus on {campaign}</option>
-                <optgroup label="Seasonal" style="font-weight: bold;">
-                </optgroup>
-                <option value="Holiday Prep: {campaign}">Holiday Prep: {campaign} Campaigns</option>
-                <optgroup label="Resources" style="font-weight: bold;">
-                </optgroup>
-                <option value="Resources and Tools for {campaign}">Resources and Tools for {campaign}</option>
-                <option value="New Resources Available for {campaign}">New Resources Available for {campaign}</option>
-                <option value="Exclusive Early Access to {campaign}">Exclusive Early Access to {campaign}</option>
-                <option value="Top Tips for Maximizing {campaign}">Top Tips for Maximizing {campaign}</option>
-            </select>
+    <select id="autoSubjectSelect" name="autoSubjectSelect">
+    <option value="">Select a subject title</option>
+    
+    <optgroup label="Campaign Updates" style="font-weight: bold;">
+    </optgroup>
+    <option value="Important Rate Changes for {campaign}">Important Rate Changes for {campaign}</option>
+    <option value="New Assets Available for {campaign}">New Assets Available for {campaign}</option>
+    <option value="Upcoming Changes: {campaign}">Upcoming Changes: {campaign}</option>
+    
+    <optgroup label="Promotions" style="font-weight: bold;">
+    </optgroup>
+    <option value="Special Offer: Updated Rates for {campaign}">Special Offer: Updated Rates for {campaign}</option>
+    <option value="New Promotional Assets Now Available for {campaign}">New Promotional Assets Now Available for {campaign}</option>
+    <option value="Boost Your Commissions with {campaign}">Boost Your Commissions with {campaign}</option>
+
+    <optgroup label="Seasonal" style="font-weight: bold;">
+    </optgroup>
+    <option value="Holiday Prep: {campaign}">Holiday Prep: {campaign}</option>
+    <option value="Prepare for the Season with {campaign}">Prepare for the Season with {campaign}</option>
+    <option value="Seasonal Spotlight: {campaign} ">Seasonal Spotlight: {campaign}</option>
+
+    <optgroup label="Resources" style="font-weight: bold;">
+    </optgroup>
+    <option value="Top Tips for {campaign}">Top Tips for {campaign}</option>
+    <option value="Exclusive Coupon Codes for {campaign}"> Exclusive Coupon Codes for {campaign} </option>
+    <option value="New Resources Available for {campaign}">New Assets Available for {campaign}</option>
+
+    <optgroup label="Pauses & Restarts" style="font-weight: bold;">
+    </optgroup>
+    <option value="Temporary Pause: {campaign}">Temporary Pause: {campaign} </option>
+    <option value="Heads Up: {campaign} Restarting Soon">Heads Up, we're restarting {campaign}</option>
+    <option value="Pausing {campaign}: What You Need to Know">Pausing {campaign}: What You Need to Know</option>
+
+    <optgroup label="Rate Changes" style="font-weight: bold;">
+    </optgroup>
+    <option value="New Payout Rates for {campaign}">New Payout Rates for {campaign}</option>
+    <option value="Rate Adjustment Alert: {campaign}">Rate Adjustment Alert: {campaign}</option>
+    <option value="Boost Your Earnings: New Rates for {campaign}">Boost Your Earnings: New Rates for {campaign}</option>
+</select>
+
+
+
         </div>
 
         <!-- New checkbox and dropdown for Auto Email Text Above All -->
@@ -929,18 +947,18 @@ function generateEmail() {
             if (campaignName && campaignID) {
                 const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName}${campaignType ? ' - ' + campaignType : ''}${campaignCountry ? ' - ' + campaignCountry : ''}`;
                 cellContent = `
-                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:10px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
                             ${titleContent}
                         </a>
                     </h3>
+                    ${!state.hideRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
                     ${!noThumbnails && !state.hideThumbnail && landingPage ? `
                         <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
                             <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
                         </a>
                     ` : ''}
-                    ${!state.hideRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${commissionDetails}</p>` : ''}
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
                 `;
             }
