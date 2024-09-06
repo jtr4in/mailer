@@ -576,13 +576,6 @@ function createCampaignInput(index) {
                     <input type="checkbox" id="hideThumbnailStandard${index}" name="hideThumbnailStandard${index}" ${state.hideThumbnail ? 'checked' : ''}>
                     <label for="hideThumbnailStandard${index}">Hide Thumbnail</label>
                 </div>
-                <label for="priorityLevel${index}">Priority Level:</label>
-                <select id="priorityLevel${index}" name="priorityLevel${index}">
-                    <option value="None" ${state.priorityLevel === 'None' ? 'selected' : ''}>None</option>
-                    <option value="Low" ${state.priorityLevel === 'Low' ? 'selected' : ''}>Low</option>
-                    <option value="Medium" ${state.priorityLevel === 'Medium' ? 'selected' : ''}>Medium</option>
-                    <option value="High" ${state.priorityLevel === 'High' ? 'selected' : ''}>High</option>
-                </select>
             </div>
             <div class="custom-fields" id="customFields${index}" style="display: ${state.isCustom ? 'block' : 'none'}">
                 <label for="customTitle${index}">Title:</label>
@@ -608,6 +601,10 @@ function createCampaignInput(index) {
                     <input type="checkbox" id="hideThumbnailCustom${index}" name="hideThumbnailCustom${index}" ${state.hideThumbnail ? 'checked' : ''}>
                     <label for="hideThumbnailCustom${index}">Hide Thumbnail</label>
                 </div>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="hideSubtitle${index}" name="hideSubtitle${index}" ${state.hideSubtitle ? 'checked' : ''}>
+                <label for="hideSubtitle${index}">Hide Subtitle</label>
             </div>
         </div>
     `;
@@ -656,7 +653,8 @@ function updateCampaignState(newNumCampaigns) {
                 customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
                 highlight: highlight,
                 hideRate: hideRate,
-                hideThumbnail: hideThumbnail
+                hideThumbnail: hideThumbnail,
+                hideSubtitle: document.getElementById(`hideSubtitle${i}`)?.checked || false
             } : {
                 isCustom: false,
                 updateType: document.getElementById(`updateType${i}`)?.value || '',
@@ -664,9 +662,9 @@ function updateCampaignState(newNumCampaigns) {
                 customText: document.getElementById(`customText${i}`)?.value || '',
                 textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
                 highlight: highlight,
-                priorityLevel: document.getElementById(`priorityLevel${i}`)?.value || 'None',
                 hideRate: hideRate,
-                hideThumbnail: hideThumbnail
+                hideThumbnail: hideThumbnail,
+                hideSubtitle: document.getElementById(`hideSubtitle${i}`)?.checked || false
             };
         } else {
             console.error(`customToggle${i} not found`);
@@ -692,6 +690,7 @@ function extractCampaignInfo(campaignInfo) {
     let campaignCountry = '';
     let conversionType = '';
     let commissionDetails = '';
+    let subtitle = '';
 
     const lines = campaignInfo.split('\n');
     if (lines.length > 0) {
@@ -699,6 +698,7 @@ function extractCampaignInfo(campaignInfo) {
         const parts = firstLine.split(' - ');
         if (parts.length >= 3) {
             campaignName = parts[0].trim();
+            subtitle = parts[1].trim();
             const countryAndId = parts[2].trim();
             
             // Extract country from within brackets
@@ -742,9 +742,12 @@ function extractCampaignInfo(campaignInfo) {
             // Remove 'of sale' if the amount is a percentage
             if (amount.includes('%')) {
                 amount = amount.replace('of sale', '').trim();
+                commissionDetails = `${amount} of ${action}`;
+            } else {
+                // For flat rates, remove 'of' and 'lead'
+                amount = amount.replace('per lead', '').trim();
+                commissionDetails = `${amount} per ${action}`;
             }
-            
-            commissionDetails = `${amount} of ${action}`;
         }
     }
 
@@ -753,7 +756,8 @@ function extractCampaignInfo(campaignInfo) {
         id: campaignID || '', 
         country: campaignCountry || '', 
         conversionType: conversionType || '',
-        commissionDetails: commissionDetails || ''
+        commissionDetails: commissionDetails || '',
+        subtitle: subtitle || ''
     };
 }
 
@@ -948,7 +952,6 @@ function generateEmail() {
         const state = campaignState[i];
         let cellContent = '';
 
-        const priorityStyle = state.priorityLevel ? `border-left: 5px solid ${getPriorityColor(state.priorityLevel)};` : '';
         const highlightStyle = state.highlight ? 'background-color: #dd1e31; color: white;' : '';
 
         if (state.isCustom) {
@@ -972,6 +975,7 @@ function generateEmail() {
             let campaignName = campaignInfo.name;
             let campaignID = campaignInfo.id;
             let campaignCountry = campaignInfo.country;
+            let subtitle = campaignInfo.subtitle;
             let landingPage = '';
             let commissionDetails = campaignInfo.commissionDetails;
 
@@ -993,6 +997,7 @@ function generateEmail() {
                             ${titleContent}
                         </a>
                     </h3>
+                    ${!state.hideSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${subtitle}</p>` : ''}
                     ${!state.hideRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
                     ${!noThumbnails && !state.hideThumbnail && landingPage ? `
@@ -1006,7 +1011,7 @@ function generateEmail() {
         }
 
         campaignsHtml += `
-            <td width="${cellWidth}" valign="top" style="padding:10px; ${priorityStyle} ${highlightStyle} word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+            <td width="${cellWidth}" valign="top" style="padding:10px; ${highlightStyle} word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                 ${cellContent}
             </td>
         `;
