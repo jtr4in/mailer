@@ -332,22 +332,22 @@
     <optgroup label="General Updates" style="font-weight: bold;">
     </optgroup>
     <option value="Important update for the following campaign:">Important update for the following campaign:</option>
-    <option value="Rate change alert for the following campaign">Rate change alert for the following campaign</option>
+    <option value="Rate change alert for the following campaign:">Rate change alert for the following campaign:</option>
     <option value="New restrictions for the following campaign:">New restrictions for the following campaign:</option>
-    <option value="The following campaigns are now by request only.">The following campaign is now by request only.</option>
+    <option value="The following campaign is now by request only.">The following campaign is now by request only.</option>
     <option value="Payout structure adjusted for the following campaign:">Payout structure adjusted for the following campaign:</option>
     <option value="New targeting options for the following campaign:">New targeting options for the following campaign:</option>
     <option value="The following campaign has been paused.">The following campaign has been paused.</option>
     <option value="Good news! The following campaign is coming back.">Good news! The following campaign is coming back.</option>
     <optgroup label="Personalized Recommendations" style="font-weight: bold;">
     </optgroup>
-    <option value="We've handpicked these campaigns just for you based on your past performance:">We've handpicked this campaign just for you based on your past performance:</option>
-    <option value="Here are top-converting campaigns that you should consider promoting:">Here is a top-converting campaign that you should consider promoting:</option>
-    <option value="These campaigns are a great match for your traffic:">This campaign is a great match for your traffic.</option>
-    <option value="Promote these campaigns for better results:">Promote this campaign for better results.</option>
-    <option value="These campaigns fit your audience perfectly:">This campaign fits your audience perfectly.</option>
-    <option value="These campaigns could improve your performance:">This campaign could improve your performance.</option>
-    <option value="Boost your earnings with these top picks:">Boost your earnings with these top picks.</option>
+    <option value="We've handpicked this campaign just for you based on your past performance:">We've handpicked this campaign just for you based on your past performance:</option>
+    <option value="Here is a top-converting campaign that you should consider promoting:">Here is a top-converting campaign that you should consider promoting:</option>
+    <option value="This campaign is a great match for your traffic.">This campaign is a great match for your traffic.</option>
+    <option value="Promote this campaign for better results.">Promote this campaign for better results.</option>
+    <option value="This campaign fits your audience perfectly.">This campaign fits your audience perfectly.</option>
+    <option value="This campaign could improve your performance.">This campaign could improve your performance.</option>
+    <option value="Boost your earnings with these top picks.">Boost your earnings with these top picks.</option>
     
              
             </select>
@@ -762,7 +762,17 @@ function pluralizeText(text, numCampaigns) {
         .replace(/this great opportunity/g, "these great opportunities")
         .replace(/This great opportunity/g, "These great opportunities")
         .replace(/campaign is/g, "campaigns are")
-        .replace(/Campaign is/g, "Campaigns are");
+        .replace(/Campaign is/g, "Campaigns are")
+        .replace(/campaign has/g, "campaigns have")
+        .replace(/Campaign has/g, "Campaigns have")
+        .replace(/campaign fits/g, "campaigns fit")
+        .replace(/Campaign fits/g, "Campaigns fit")
+        .replace(/campaign could/g, "campaigns could")
+        .replace(/Campaign could/g, "Campaigns could")
+        .replace(/campaigns is/g, "campaigns are")
+        .replace(/Campaigns is/g, "Campaigns are")
+        .replace(/campaigns has/g, "campaigns have")
+        .replace(/Campaigns has/g, "Campaigns have");
 }
 
 function generateEmail() {
