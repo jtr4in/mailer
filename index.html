@@ -475,7 +475,6 @@
 
         <div id="autoSignOffContainer">
             <select id="autoSignOffSelect" name="autoSignOffSelect">
-                <option value="">Select a sign-off option</option>
                 <option value="If you have any questions, please contact your Affiliate Manager.">If you have any questions, please contact your Affiliate Manager.</option>
                 <option value="Thank you for your continued partnership. We look forward to your success!">Thank you for your continued partnership. We look forward to your success!</option>
                 <option value="Best regards,&#10;The Affiliate Team">Best regards,&#10;The Affiliate Team</option>
@@ -602,6 +601,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add scroll buttons
     addScrollButtons();
+
+    // Set default value for Auto Sign Off
+    const autoSignOffSelect = document.getElementById('autoSignOffSelect');
+    if (autoSignOffSelect) {
+        autoSignOffSelect.value = "If you have any questions, please contact your Affiliate Manager.";
+    }
 });
 
 function createCampaignInput(index) {
@@ -620,14 +625,18 @@ function createCampaignInput(index) {
 
     function updateSentenceModeUI() {
         const isCustom = document.getElementById(`customToggle${index}`).checked;
-        const sentenceModeToggle = document.getElementById(`sentenceMode${index}`);
+        const sentenceModeToggle = isCustom 
+            ? document.getElementById(`sentenceMode${index}`)
+            : document.getElementById(`sentenceModeStandard${index}`);
         const textUnderTitleLabel = document.getElementById(`textUnderTitleLabel${index}`);
         const textUnderTitleInput = document.getElementById(`textUnderTitle${index}`);
+        const subtitleCheckboxContainer = document.getElementById(`subtitleCheckboxContainer${index}`);
         
-        if (sentenceModeToggle && textUnderTitleLabel && textUnderTitleInput) {
+        if (sentenceModeToggle && textUnderTitleLabel && textUnderTitleInput && subtitleCheckboxContainer) {
             const isSentenceMode = sentenceModeToggle.checked;
             textUnderTitleLabel.textContent = isSentenceMode ? 'Sentence After Title:' : 'Text Under Title:';
             textUnderTitleInput.placeholder = isSentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title';
+            subtitleCheckboxContainer.style.display = isSentenceMode ? 'none' : 'inline-block';
         }
     }
 
@@ -683,7 +692,7 @@ function createCampaignInput(index) {
                         <input type="checkbox" id="showThumbnailStandard${index}" name="showThumbnailStandard${index}" ${state.showThumbnail !== false ? 'checked' : ''}>
                         <label for="showThumbnailStandard${index}">Thumbnail</label>
                     </div>
-                    <div class="checkbox-container">
+                    <div class="checkbox-container" id="subtitleCheckboxContainer${index}">
                         <input type="checkbox" id="showSubtitle${index}" name="showSubtitle${index}" ${state.showSubtitle !== false ? 'checked' : ''}>
                         <label for="showSubtitle${index}">Subtitle</label>
                     </div>
@@ -827,6 +836,16 @@ function initializeCampaignInputs() {
                     updateCampaignState();
                 }, 0);
             });
+        }
+
+        // Add event listeners for sentence mode toggles
+        const sentenceModeStandard = document.getElementById(`sentenceModeStandard${i}`);
+        const sentenceModeCustom = document.getElementById(`sentenceMode${i}`);
+        if (sentenceModeStandard) {
+            sentenceModeStandard.addEventListener('change', window[`updateSentenceModeUI${i}`]);
+        }
+        if (sentenceModeCustom) {
+            sentenceModeCustom.addEventListener('change', window[`updateSentenceModeUI${i}`]);
         }
     }
 }
@@ -991,7 +1010,7 @@ function generateEmail() {
     let signOffText = '';
     const useAutoSignOff = document.getElementById('useAutoSignOff').checked;
     if (useAutoSignOff) {
-        signOffText = document.getElementById('autoSignOffSelect').value;
+        signOffText = document.getElementById('autoSignOffSelect').value || "If you have any questions, please contact your Affiliate Manager.";
     } else {
         signOffText = document.getElementById('customSignOff').value;
     }
@@ -1356,7 +1375,7 @@ function generateEmail() {
     let signOffText = '';
     const useAutoSignOff = document.getElementById('useAutoSignOff').checked;
     if (useAutoSignOff) {
-        signOffText = document.getElementById('autoSignOffSelect').value;
+        signOffText = document.getElementById('autoSignOffSelect').value || "If you have any questions, please contact your Affiliate Manager.";
     } else {
         signOffText = document.getElementById('customSignOff').value;
     }
