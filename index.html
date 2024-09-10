@@ -21,6 +21,7 @@
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
+            font-size: 16px;
         }
 
         h2 {
@@ -153,8 +154,9 @@
         .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 30px;
+            height: 15px;
+            margin-right: 10px;
         }
 
         .toggle-switch input {
@@ -172,16 +174,16 @@
             bottom: 0;
             background-color: #ccc;
             transition: .4s;
-            border-radius: 34px;
+            border-radius: 20px;
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
+            height: 11px;
+            width: 11px;
+            left: 2px;
+            bottom: 2px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
@@ -192,7 +194,7 @@
         }
 
         input:checked + .slider:before {
-            transform: translateX(26px);
+            transform: translateX(15px);
         }
 
         .custom-fields {
@@ -205,6 +207,7 @@
     .toggle-container {
         display: flex;
         align-items: center;
+        margin-bottom: 5px;
     }
 
     .tooltip-wrapper {
@@ -247,6 +250,15 @@
         border-width: 5px;
         border-style: solid;
         border-color: #555 transparent transparent transparent;
+    }
+
+    .standard-only {
+        transition: display 0.3s ease;
+    }
+
+    textarea {
+        font-size: 0.9em;
+        resize: vertical;
     }
 </style>
 </head>
@@ -447,11 +459,30 @@
 let textAboveCampaigns = '';
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+    
+    const form = document.getElementById('emailBuilderForm');
+    if (!form) {
+        console.error('emailBuilderForm not found');
+        return;
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log('Form submitted');
+        try {
+            updateCampaignState();
+            generateEmail();
+        } catch (error) {
+            console.error('Error in form submission:', error);
+        }
+    });
+
     // Add this new style tag to the head of the document
     const style = document.createElement('style');
     style.textContent = `
         body {
-            font-size: 14px;
+            font-size: 16px;
         }
         .campaign-item {
             font-size: 0.9em;
@@ -514,13 +545,6 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeCampaignInputs();
     });
 
-    document.getElementById('emailBuilderForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        console.log('Form submitted');
-        updateCampaignState();
-        generateEmail();
-    });
-
     document.getElementById('copyHtml').addEventListener('click', function() {
         const htmlContent = document.getElementById('output').innerHTML;
         navigator.clipboard.writeText(htmlContent).then(() => {
@@ -538,6 +562,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function createCampaignInput(index) {
     const state = campaignState[index] || {};
+
+    function updateSentenceModeUI() {
+        const sentenceModeToggle = document.getElementById(`sentenceModeStandard${index}`);
+        const textUnderTitleLabel = document.getElementById(`textUnderTitleLabel${index}`);
+        const textUnderTitleInput = document.getElementById(`textUnderTitle${index}`);
+        
+        if (sentenceModeToggle && textUnderTitleLabel && textUnderTitleInput) {
+            const isSentenceMode = sentenceModeToggle.checked;
+            textUnderTitleLabel.textContent = isSentenceMode ? 'Sentence After Title:' : 'Text Under Title:';
+            textUnderTitleInput.placeholder = isSentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title';
+        }
+    }
+
+    // Ensure this function is available globally
+    window[`updateSentenceModeUI${index}`] = updateSentenceModeUI;
+
     return `
         <div class="campaign-item">
             <div class="campaign-header">
@@ -564,23 +604,45 @@ function createCampaignInput(index) {
                 </select>
 
                 <label for="campaignInfo${index}">Paste "Copy Image" from Admin:</label>
-                <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="3" placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
+                <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="2" 
+                          style="font-size: 0.9em; resize: vertical;" 
+                          placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
 
            
 
-                <label for="textUnderTitle${index}">Text Under Title:</label>
-                <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="2" placeholder="Enter text to appear under the title">${state.textUnderTitle || ''}</textarea>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="highlightStandard${index}" name="highlightStandard${index}" ${state.highlight ? 'checked' : ''}>
-                    <label for="highlightStandard${index}">Highlight Campaign</label>
+                <div class="toggle-container standard-only">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sentenceModeStandard${index}" name="sentenceModeStandard${index}" ${state.sentenceMode ? 'checked' : ''} onchange="updateSentenceModeUI${index}()">
+                        <span class="slider"></span>
+                    </label>
+                    <div class="tooltip-wrapper">
+                        <span>Sentence Mode</span>
+                        <span class="tooltip-text">Toggle for sentence mode</span>
+                    </div>
                 </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="hideRateStandard${index}" name="hideRateStandard${index}" ${state.hideRate ? 'checked' : ''}>
-                    <label for="hideRateStandard${index}">Hide Rate</label>
-                </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="hideThumbnailStandard${index}" name="hideThumbnailStandard${index}" ${state.hideThumbnail ? 'checked' : ''}>
-                    <label for="hideThumbnailStandard${index}">Hide Thumbnail</label>
+                <label for="textUnderTitle${index}" id="textUnderTitleLabel${index}">
+                    ${state.sentenceMode ? 'Sentence After Title:' : 'Text Under Title:'}
+                </label>
+                <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="3" 
+                          style="font-size: 0.9em; resize: vertical;"
+                          placeholder="${state.sentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title'}">${state.textUnderTitle || ''}</textarea>
+                <div class="form-row">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="highlightStandard${index}" name="highlightStandard${index}" ${state.highlight ? 'checked' : ''}>
+                        <label for="highlightStandard${index}">Highlight</label>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="showRateStandard${index}" name="showRateStandard${index}" ${state.showRate !== false ? 'checked' : ''}>
+                        <label for="showRateStandard${index}">Rate</label>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="showThumbnailStandard${index}" name="showThumbnailStandard${index}" ${state.showThumbnail !== false ? 'checked' : ''}>
+                        <label for="showThumbnailStandard${index}">Thumbnail</label>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="showSubtitle${index}" name="showSubtitle${index}" ${state.showSubtitle !== false ? 'checked' : ''}>
+                        <label for="showSubtitle${index}">Subtitle</label>
+                    </div>
                 </div>
             </div>
             <div class="custom-fields" id="customFields${index}" style="display: ${state.isCustom ? 'block' : 'none'}">
@@ -599,18 +661,6 @@ function createCampaignInput(index) {
                     <input type="checkbox" id="highlightCustom${index}" name="highlightCustom${index}" ${state.highlight ? 'checked' : ''}>
                     <label for="highlightCustom${index}">Highlight Campaign</label>
                 </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="hideRateCustom${index}" name="hideRateCustom${index}" ${state.hideRate ? 'checked' : ''}>
-                    <label for="hideRateCustom${index}">Hide Rate</label>
-                </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="hideThumbnailCustom${index}" name="hideThumbnailCustom${index}" ${state.hideThumbnail ? 'checked' : ''}>
-                    <label for="hideThumbnailCustom${index}">Hide Thumbnail</label>
-                </div>
-            </div>
-            <div class="checkbox-container">
-                <input type="checkbox" id="hideSubtitle${index}" name="hideSubtitle${index}" ${state.hideSubtitle ? 'checked' : ''}>
-                <label for="hideSubtitle${index}">Hide Subtitle</label>
             </div>
         </div>
     `;
@@ -620,14 +670,17 @@ function toggleCustomFields(index) {
     const customToggle = document.getElementById(`customToggle${index}`);
     const standardFields = document.getElementById(`standardFields${index}`);
     const customFields = document.getElementById(`customFields${index}`);
+    const standardOnlyCheckboxes = standardFields.querySelectorAll('.standard-only');
 
     if (customToggle && standardFields && customFields) {
         if (customToggle.checked) {
             standardFields.style.display = 'none';
             customFields.style.display = 'block';
+            standardOnlyCheckboxes.forEach(checkbox => checkbox.style.display = 'none');
         } else {
             standardFields.style.display = 'block';
             customFields.style.display = 'none';
+            standardOnlyCheckboxes.forEach(checkbox => checkbox.style.display = 'block');
         }
         updateCampaignState();
     }
@@ -645,32 +698,23 @@ function updateCampaignState(newNumCampaigns) {
             const highlight = isCustom 
                 ? document.getElementById(`highlightCustom${i}`).checked
                 : document.getElementById(`highlightStandard${i}`).checked;
-            const hideRate = isCustom
-                ? document.getElementById(`hideRateCustom${i}`).checked
-                : document.getElementById(`hideRateStandard${i}`).checked;
-            const hideThumbnail = isCustom
-                ? document.getElementById(`hideThumbnailCustom${i}`).checked
-                : document.getElementById(`hideThumbnailStandard${i}`).checked;
             campaignState[i] = isCustom ? {
                 isCustom: true,
                 customTitle: document.getElementById(`customTitle${i}`)?.value || '',
                 customBodyText: document.getElementById(`customBodyText${i}`)?.value || '',
                 customImageUrl: document.getElementById(`customImageUrl${i}`)?.value || '',
                 customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
-                highlight: highlight,
-                hideRate: hideRate,
-                hideThumbnail: hideThumbnail,
-                hideSubtitle: document.getElementById(`hideSubtitle${i}`)?.checked || false
+                highlight: highlight
             } : {
                 isCustom: false,
                 updateType: document.getElementById(`updateType${i}`)?.value || '',
                 campaignInfo: document.getElementById(`campaignInfo${i}`)?.value || '',
-                customText: document.getElementById(`customText${i}`)?.value || '',
                 textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
                 highlight: highlight,
-                hideRate: hideRate,
-                hideThumbnail: hideThumbnail,
-                hideSubtitle: document.getElementById(`hideSubtitle${i}`)?.checked || false
+                showRate: document.getElementById(`showRateStandard${i}`).checked,
+                showThumbnail: document.getElementById(`showThumbnailStandard${i}`).checked,
+                showSubtitle: document.getElementById(`showSubtitle${i}`).checked,
+                sentenceMode: document.getElementById(`sentenceModeStandard${i}`).checked
             };
         } else {
             console.error(`customToggle${i} not found`);
@@ -688,6 +732,228 @@ function initializeCampaignInputs() {
     for (let i = 0; i < numCampaigns; i++) {
         campaignInputs.innerHTML += createCampaignInput(i);
     }
+    
+    // Add this loop to initialize the UI for each campaign
+    for (let i = 0; i < numCampaigns; i++) {
+        window[`updateSentenceModeUI${i}`]();
+    }
+}
+
+function nl2br(str) {
+    if (typeof str === 'undefined' || str === null) {
+        return '';
+    }
+    return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br>$2');
+}
+
+function generateEmail() {
+    console.log('generateEmail function called');
+    updateCampaignState();
+    console.log('Campaign state:', campaignState);
+
+    const useAutoSubject = document.getElementById('useAutoSubject');
+    if (!useAutoSubject) {
+        console.error('useAutoSubject element not found');
+        return;
+    }
+    const useAutoSubjectChecked = useAutoSubject.checked;
+    console.log('Use auto subject:', useAutoSubjectChecked);
+
+    let subjectTitle;
+    if (useAutoSubjectChecked) {
+        const autoSubjectSelect = document.getElementById('autoSubjectSelect');
+        if (!autoSubjectSelect) {
+            console.error('autoSubjectSelect element not found');
+            return;
+        }
+        subjectTitle = autoSubjectSelect.value;
+    } else {
+        const subjectTitleInput = document.getElementById('subjectTitle');
+        if (!subjectTitleInput) {
+            console.error('subjectTitle element not found');
+            return;
+        }
+        subjectTitle = subjectTitleInput.value;
+    }
+    console.log('Subject title:', subjectTitle);
+
+    const useAutoTextAbove = document.getElementById('useAutoTextAbove');
+    if (!useAutoTextAbove) {
+        console.error('useAutoTextAbove element not found');
+        return;
+    }
+    const useAutoTextAboveChecked = useAutoTextAbove.checked;
+    console.log('Use auto text above:', useAutoTextAboveChecked);
+
+    let textAboveCampaigns;
+    if (useAutoTextAboveChecked) {
+        const autoTextAboveSelect = document.getElementById('autoTextAboveSelect');
+        if (!autoTextAboveSelect) {
+            console.error('autoTextAboveSelect element not found');
+            return;
+        }
+        textAboveCampaigns = autoTextAboveSelect.value;
+    } else {
+        const textAboveCampaignsInput = document.getElementById('textAboveCampaigns');
+        if (!textAboveCampaignsInput) {
+            console.error('textAboveCampaigns element not found');
+            return;
+        }
+        textAboveCampaigns = textAboveCampaignsInput.value;
+    }
+    console.log('Text above campaigns:', textAboveCampaigns);
+
+    const useAutoTextBeforeSignOff = document.getElementById('useAutoTextBeforeSignOff');
+    if (!useAutoTextBeforeSignOff) {
+        console.error('useAutoTextBeforeSignOff element not found');
+        return;
+    }
+    const useAutoTextBeforeSignOffChecked = useAutoTextBeforeSignOff.checked;
+    console.log('Use auto text before sign off:', useAutoTextBeforeSignOffChecked);
+
+    let textBeforeSignOff;
+    if (useAutoTextBeforeSignOffChecked) {
+        const autoTextBeforeSignOffSelect = document.getElementById('autoTextBeforeSignOffSelect');
+        if (!autoTextBeforeSignOffSelect) {
+            console.error('autoTextBeforeSignOffSelect element not found');
+            return;
+        }
+        textBeforeSignOff = autoTextBeforeSignOffSelect.value;
+    } else {
+        const textBeforeSignOffInput = document.getElementById('afterLearnMore');
+        if (!textBeforeSignOffInput) {
+            console.error('afterLearnMore element not found');
+            return;
+        }
+        textBeforeSignOff = textBeforeSignOffInput.value;
+    }
+    console.log('Text before sign off:', textBeforeSignOff);
+
+    const numCampaigns = parseInt(document.getElementById('numCampaigns').value);
+    const columns = parseInt(document.getElementById('columns').value);
+    const noThumbnails = document.getElementById('noThumbnails').checked;
+
+    let htmlOutput = '';
+    let cellContent = '';
+    let cellWidth = 100 / columns;
+
+    for (let i = 0; i < numCampaigns; i++) {
+        const state = campaignState[i];
+        if (!state) {
+            console.error(`Campaign state not found for index ${i}`);
+            continue;
+        }
+
+        if (state.isCustom) {
+            cellContent = `
+                <div style="background-color:${state.highlight ? '#dd1e31' : '#ffffff'}; color:${state.highlight ? 'white' : '#333333'}; padding:10px; border-radius:5px; margin-bottom:10px;">
+                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                        <a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                            ${state.customTitle}
+                        </a>
+                    </h3>
+                    <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.customBodyText)}</p>
+                    <a href="${state.customLearnMoreUrl}">
+                        <img src="${state.customImageUrl}" alt="${state.customTitle} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
+                    </a>
+                </div>
+            `;
+        } else {
+            const campaignInfo = state.campaignInfo;
+            const campaignID = campaignInfo.match(/campaign_id=(\d+)/)[1];
+            const campaignName = campaignInfo.match(/<h3>(.*?)<\/h3>/)[1];
+            const landingPage = campaignInfo.match(/src="(.*?)"/)[1];
+            const subtitle = campaignInfo.match(/<p>(.*?)<\/p>/)[1];
+            const commissionDetails = campaignInfo.match(/<p>(.*?)<\/p>/)[2];
+
+            const titleContent = state.updateType === 'None' ? campaignName : `${state.updateType}: ${campaignName}`;
+
+            cellContent = `
+                <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                    <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                        ${titleContent}
+                    </a>
+                    ${state.sentenceMode ? `<span style="font-weight: normal;">${state.textUnderTitle ? ` ${state.textUnderTitle}` : ''}</span>` : ''}
+                </h3>
+                ${!state.sentenceMode && state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${subtitle}</p>` : ''}
+                ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
+                ${!state.sentenceMode ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle || '')}</p>` : ''}
+                ${state.showThumbnail && !noThumbnails && landingPage ? `
+                    <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
+                        <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
+                    </a>
+                ` : ''}
+            `;
+        }
+
+        htmlOutput += `
+            <div style="width:${cellWidth}%; display:inline-block; vertical-align:top; padding:0 10px; box-sizing:border-box;">
+                <div style="background-color:${state.highlight ? '#dd1e31' : '#ffffff'}; color:${state.highlight ? 'white' : '#333333'}; padding:10px; border-radius:5px; margin-bottom:10px;">
+                    ${cellContent}
+                </div>
+            </div>
+        `;
+    }
+
+    htmlOutput = `
+        <div style="font-family:Arial, sans-serif; max-width:600px; margin:0 auto;">
+            <div style="background-color:#dd1e31; color:white; padding:10px; text-align:center; font-size:18px; font-weight:bold;">
+                ${subjectTitle}
+            </div>
+            <div style="padding:20px;">
+                ${textAboveCampaigns ? `<p style="font-size:14px; margin-bottom:20px;">${nl2br(textAboveCampaigns)}</p>` : ''}
+                ${htmlOutput}
+                ${textBeforeSignOff ? `<p style="font-size:14px; margin-top:20px;">${nl2br(textBeforeSignOff)}</p>` : ''}
+            </div>
+        </div>
+    `;
+
+    const output = document.getElementById('output');
+    if (!output) {
+        console.error('output element not found');
+        return;
+    }
+    output.innerHTML = htmlOutput;
+    console.log('Email generated and inserted into output');
+    
+    const copyHtmlBtn = document.getElementById('copyHtml');
+    if (copyHtmlBtn) {
+        copyHtmlBtn.style.display = 'block';
+    } else {
+        console.error('copyHtml button not found');
+    }
+}
+
+// Add scroll buttons
+function addScrollButtons() {
+    const scrollContainer = document.getElementById('campaignInputs');
+    if (!scrollContainer) {
+        console.error('campaignInputs element not found');
+        return;
+    }
+
+    const scrollLeftBtn = document.createElement('button');
+    scrollLeftBtn.innerText = 'Scroll Left';
+    scrollLeftBtn.style.position = 'fixed';
+    scrollLeftBtn.style.top = '10px';
+    scrollLeftBtn.style.left = '10px';
+    scrollLeftBtn.style.zIndex = '1000';
+    scrollLeftBtn.addEventListener('click', () => {
+        scrollContainer.scrollLeft -= 100;
+    });
+
+    const scrollRightBtn = document.createElement('button');
+    scrollRightBtn.innerText = 'Scroll Right';
+    scrollRightBtn.style.position = 'fixed';
+    scrollRightBtn.style.top = '10px';
+    scrollRightBtn.style.right = '10px';
+    scrollRightBtn.style.zIndex = '1000';
+    scrollRightBtn.addEventListener('click', () => {
+        scrollContainer.scrollLeft += 100;
+    });
+
+    document.body.appendChild(scrollLeftBtn);
+    document.body.appendChild(scrollRightBtn);
 }
 
 function extractCampaignInfo(campaignInfo) {
@@ -791,71 +1057,6 @@ function pluralizeText(text, numCampaigns) {
         .replace(/Campaigns has/g, "Campaigns have");
 }
 
-function generateEmail() {
-    const subjectTitle = document.getElementById('useAutoSubject').checked
-        ? document.getElementById('autoSubjectSelect').value
-        : document.getElementById('subjectTitle').value;
-
-    const useAutoTextAbove = document.getElementById('useAutoTextAbove').checked;
-    const textAboveCampaigns = useAutoTextAbove
-        ? document.getElementById('autoTextAboveSelect').value
-        : document.getElementById('textAboveCampaigns').value;
-
-    const useAutoTextBeforeSignOff = document.getElementById('useAutoTextBeforeSignOff').checked;
-    const afterLearnMore = useAutoTextBeforeSignOff
-        ? document.getElementById('autoTextBeforeSignOffSelect').value
-        : document.getElementById('afterLearnMore').value;
-
-    const numCampaigns = parseInt(document.getElementById('numCampaigns').value);
-    const columns = parseInt(document.getElementById('columns').value);
-    const noThumbnails = document.getElementById('noThumbnails').checked;
-
-    let emailContent = '';
-
-    // Replace {campaign} in subject line
-    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} (${campaignInfo.country})`);
-    console.log('Final subject title:', subjectTitle);
-
-    emailContent += `
-${subjectTitle}
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-</head>
-<body style="margin:0; padding:0; background-color:#F2F2F2;">
-    <center>
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#F2F2F2">
-            <tr>
-                <td align="center" valign="top">
-                    <table border="0" cellpadding="0" cellspacing="0" width="${totalWidth}" style="max-width:${totalWidth}px;">
-                        <tr>
-                            <td align="left" valign="top" style="padding:20px; font-family:Arial, sans-serif; color:#333333;">
-                                <p style="font-size:14px; margin-bottom:20px;">#firstName#,</p>
-                                <p style="font-size:14px; margin-bottom:20px;">${pluralizeText(textAboveCampaigns, numCampaigns)}</p>
-                                ${campaignsHtml}
-                                <p style="font-size:14px; margin-top:20px;">${pluralizeText(afterLearnMore, numCampaigns)}</p>
-                                <p style="font-size:14px; margin-top:20px;">If you have any questions, please contact your Affiliate Manager.</p>
-                                <p style="font-size:14px; margin-top:20px;">Thanks,</p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </center>
-</body>
-</html>
-    `;
-
-    document.getElementById('output').innerHTML = emailContent;
-    document.getElementById('copyHtml').style.display = 'block';
-}
-
-function nl2br(str) {
-    return str.replace(/\n/g, "<br>");
-}
 function generateEmail() {
     console.log('generateEmail function called');
     updateCampaignState();
@@ -997,22 +1198,40 @@ function generateEmail() {
 
             if (campaignName && campaignID) {
                 const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignCountry})`;
-                cellContent = `
-                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
-                        <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                            ${titleContent}
-                        </a>
-                    </h3>
-                    ${!state.hideSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${subtitle}</p>` : ''}
-                    ${!state.hideRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
-                    <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
-                    ${!noThumbnails && !state.hideThumbnail && landingPage ? `
-                        <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
-                            <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
-                        </a>
-                    ` : ''}
-                    <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
-                `;
+                
+                if (state.sentenceMode) {
+                    cellContent = `
+                        <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                                ${titleContent}
+                            </a>
+                            <span style="font-weight: normal;">${state.textUnderTitle ? ` ${state.textUnderTitle}` : ''}</span>
+                        </h3>
+                        ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
+                        ${state.showThumbnail && !noThumbnails && landingPage ? `
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
+                                <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
+                            </a>
+                        ` : ''}
+                    `;
+                } else {
+                    cellContent = `
+                        <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                                ${titleContent}
+                            </a>
+                        </h3>
+                        ${state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${subtitle}</p>` : ''}
+                        ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
+                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
+                        ${state.showThumbnail && !noThumbnails && landingPage ? `
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
+                                <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
+                            </a>
+                        ` : ''}
+                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:10px 0 5px 0; text-align: left;">${nl2br(state.customText)}</p>
+                    `;
+                }
             }
         }
 
@@ -1036,6 +1255,11 @@ ${subjectTitle}
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        body {
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body style="margin:0; padding:0; background-color:#F2F2F2;">
     <center>
