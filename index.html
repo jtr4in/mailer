@@ -666,7 +666,7 @@ function createCampaignInput(index) {
 
                 <div class="toggle-container">
                     <label class="toggle-switch">
-                        <input type="checkbox" id="sentenceModeStandard${index}" name="sentenceModeStandard${index}" ${state.sentenceMode ? 'checked' : ''} onchange="updateSentenceModeUI${index}()">
+                        <input type="checkbox" id="sentenceModeStandard${index}" name="sentenceModeStandard${index}" ${state.sentenceMode !== false ? 'checked' : ''} onchange="updateSentenceModeUI${index}()">
                         <span class="slider"></span>
                     </label>
                     <span>Sentence Mode</span>
@@ -704,7 +704,7 @@ function createCampaignInput(index) {
 
                 <div class="toggle-container">
                     <label class="toggle-switch">
-                        <input type="checkbox" id="sentenceMode${index}" name="sentenceMode${index}" ${state.sentenceMode ? 'checked' : ''} onchange="updateSentenceModeUI${index}()">
+                        <input type="checkbox" id="sentenceMode${index}" name="sentenceMode${index}" ${state.sentenceMode !== false ? 'checked' : ''} onchange="updateSentenceModeUI${index}()">
                         <span class="slider"></span>
                     </label>
                     <span>Sentence Mode</span>
@@ -789,7 +789,7 @@ function updateCampaignState(newNumCampaigns) {
                 customImageUrl: document.getElementById(`customImageUrl${i}`)?.value || '',
                 customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
                 highlight: highlight,
-                sentenceMode: document.getElementById(`sentenceMode${i}`).checked,
+                sentenceMode: document.getElementById(`sentenceMode${i}`).checked !== false,
                 campaignTitle: campaignTitle
             } : {
                 isCustom: false,
@@ -800,7 +800,7 @@ function updateCampaignState(newNumCampaigns) {
                 showRate: document.getElementById(`showRateStandard${i}`).checked,
                 showThumbnail: document.getElementById(`showThumbnailStandard${i}`).checked,
                 showSubtitle: document.getElementById(`showSubtitle${i}`).checked,
-                sentenceMode: document.getElementById(`sentenceModeStandard${i}`).checked,
+                sentenceMode: document.getElementById(`sentenceModeStandard${i}`).checked !== false,
                 campaignTitle: campaignTitle
             };
         } else {
