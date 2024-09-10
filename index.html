@@ -635,7 +635,7 @@ function createCampaignInput(index) {
         if (sentenceModeToggle && textUnderTitleLabel && textUnderTitleInput && subtitleCheckboxContainer) {
             const isSentenceMode = sentenceModeToggle.checked;
             textUnderTitleLabel.textContent = isSentenceMode ? 'Sentence After Title:' : 'Text Under Title:';
-            textUnderTitleInput.placeholder = isSentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title';
+            textUnderTitleInput.placeholder = isSentenceMode ? 'has had its rate increased to...' : 'Enter text to appear under the title';
             subtitleCheckboxContainer.style.display = isSentenceMode ? 'none' : 'inline-block';
         }
     }
@@ -685,7 +685,7 @@ function createCampaignInput(index) {
                         <label for="highlightStandard${index}">Highlight</label>
                     </div>
                     <div class="checkbox-container">
-                        <input type="checkbox" id="showRateStandard${index}" name="showRateStandard${index}" ${state.showRate !== false ? 'checked' : ''}>
+                        <input type="checkbox" id="showRateStandard${index}" name="showRateStandard${index}" ${state.sentenceMode !== false ? '' : 'checked'}>
                         <label for="showRateStandard${index}">Rate</label>
                     </div>
                     <div class="checkbox-container">
@@ -715,7 +715,7 @@ function createCampaignInput(index) {
                 </label>
                 <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="3" 
                           style="font-size: 0.9em; resize: vertical; white-space: pre-wrap;"
-                          placeholder="${state.sentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title'}">${state.textUnderTitle || ''}</textarea>
+                          placeholder="${state.sentenceMode ? 'has increased its rate to...' : 'Enter text to appear under the title'}">${state.textUnderTitle || ''}</textarea>
 
                 <label for="customBodyText${index}">Custom Text:</label>
                 <textarea id="customBodyText${index}" name="customBodyText${index}" rows="3" placeholder="Enter custom body text">${state.customBodyText || ''}</textarea>
@@ -781,6 +781,10 @@ function updateCampaignState(newNumCampaigns) {
                 campaignHeader.textContent = campaignTitle;
             }
 
+            const sentenceMode = isCustom
+                ? document.getElementById(`sentenceMode${i}`).checked !== false
+                : document.getElementById(`sentenceModeStandard${i}`).checked !== false;
+
             campaignState[i] = isCustom ? {
                 isCustom: true,
                 customTitle: document.getElementById(`customTitle${i}`)?.value || '',
@@ -789,7 +793,7 @@ function updateCampaignState(newNumCampaigns) {
                 customImageUrl: document.getElementById(`customImageUrl${i}`)?.value || '',
                 customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
                 highlight: highlight,
-                sentenceMode: document.getElementById(`sentenceMode${i}`).checked !== false,
+                sentenceMode: sentenceMode,
                 campaignTitle: campaignTitle
             } : {
                 isCustom: false,
@@ -797,10 +801,10 @@ function updateCampaignState(newNumCampaigns) {
                 campaignInfo: campaignInfo,
                 textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
                 highlight: highlight,
-                showRate: document.getElementById(`showRateStandard${i}`).checked,
+                showRate: sentenceMode ? false : document.getElementById(`showRateStandard${i}`).checked,
                 showThumbnail: document.getElementById(`showThumbnailStandard${i}`).checked,
                 showSubtitle: document.getElementById(`showSubtitle${i}`).checked,
-                sentenceMode: document.getElementById(`sentenceModeStandard${i}`).checked !== false,
+                sentenceMode: sentenceMode,
                 campaignTitle: campaignTitle
             };
         } else {
