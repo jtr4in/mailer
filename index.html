@@ -676,7 +676,7 @@ function createCampaignInput(index) {
                     ${state.sentenceMode ? 'Sentence After Title:' : 'Text Under Title:'}
                 </label>
                 <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="3" 
-                          style="font-size: 0.9em; resize: vertical;"
+                          style="font-size: 0.9em; resize: vertical; white-space: pre-wrap;"
                           placeholder="${state.sentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title'}">${state.textUnderTitle || ''}</textarea>
 
                 <div class="form-row">
@@ -714,7 +714,7 @@ function createCampaignInput(index) {
                     ${state.sentenceMode ? 'Sentence After Title:' : 'Text Under Title:'}
                 </label>
                 <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="3" 
-                          style="font-size: 0.9em; resize: vertical;"
+                          style="font-size: 0.9em; resize: vertical; white-space: pre-wrap;"
                           placeholder="${state.sentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title'}">${state.textUnderTitle || ''}</textarea>
 
                 <label for="customBodyText${index}">Custom Text:</label>
@@ -984,7 +984,7 @@ function generateEmail() {
                     <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
                         ${titleContent}
                     </a>
-                    ${state.sentenceMode ? `<span style="font-weight: normal;">${state.textUnderTitle ? ` ${state.textUnderTitle}` : ''}</span>` : ''}
+                    ${state.sentenceMode ? `<span style="font-weight: normal;">${state.textUnderTitle ? nl2br(state.textUnderTitle) : ''}</span>` : ''}
                 </h3>
                 ${!state.sentenceMode && state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${subtitle}</p>` : ''}
                 ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
@@ -1328,7 +1328,7 @@ function generateEmail() {
                             <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
                                 ${titleContent}
                             </a>
-                            <span style="font-weight: normal;">${state.textUnderTitle ? ` ${state.textUnderTitle}` : ''}</span>
+                            <span style="font-weight: normal;">${state.textUnderTitle ? nl2br(state.textUnderTitle) : ''}</span>
                         </h3>
                         ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
                         ${state.showThumbnail && !noThumbnails && landingPage ? `
