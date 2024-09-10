@@ -260,6 +260,21 @@
         font-size: 0.9em;
         resize: vertical;
     }
+
+    #customSignOffContainer, #autoSignOffContainer {
+        margin-top: 10px;
+    }
+
+    #autoSignOffSelect, #customSignOff {
+        width: 100%;
+        padding: 5px;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+
+    #customSignOff {
+        resize: vertical;
+    }
 </style>
 </head>
 <body>
@@ -446,6 +461,29 @@
 
         </div>
 
+        <div class="checkbox-container">
+            <input type="checkbox" id="useAutoSignOff" name="useAutoSignOff" checked>
+            <label for="useAutoSignOff" class="tooltip">Auto Sign Off
+                <span class="tooltiptext">Choose from predefined sign-off options</span>
+            </label>
+        </div>
+
+        <div id="customSignOffContainer" style="display: none;">
+            <label for="customSignOff">Custom Sign Off:</label>
+            <textarea id="customSignOff" name="customSignOff" rows="3" placeholder="Enter custom sign-off text"></textarea>
+        </div>
+
+        <div id="autoSignOffContainer">
+            <select id="autoSignOffSelect" name="autoSignOffSelect">
+                <option value="">Select a sign-off option</option>
+                <option value="If you have any questions, please contact your Affiliate Manager.">If you have any questions, please contact your Affiliate Manager.</option>
+                <option value="Thank you for your continued partnership. We look forward to your success!">Thank you for your continued partnership. We look forward to your success!</option>
+                <option value="Best regards,&#10;The Affiliate Team">Best regards,&#10;The Affiliate Team</option>
+                <option value="Happy promoting!&#10;Your Affiliate Support Team">Happy promoting!&#10;Your Affiliate Support Team</option>
+                <option value="We're here to help you succeed. Don't hesitate to reach out if you need anything.">We're here to help you succeed. Don't hesitate to reach out if you need anything.</option>
+            </select>
+        </div>
+
         <div class="form-row">
             <button type="submit">Generate Email</button>  
             <button id="copyHtml" style="display: none;">Copy HTML</button>
@@ -539,6 +577,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('autoTextBeforeSignOffContainer').style.display = this.checked ? 'block' : 'none';
     });
 
+    // New event listener for Auto Sign Off checkbox
+    document.getElementById('useAutoSignOff').addEventListener('change', function() {
+        document.getElementById('customSignOffContainer').style.display = this.checked ? 'none' : 'block';
+        document.getElementById('autoSignOffContainer').style.display = this.checked ? 'block' : 'none';
+    });
+
     document.getElementById('numCampaigns').addEventListener('change', function() {
         const newNumCampaigns = parseInt(this.value);
         updateCampaignState(newNumCampaigns);
@@ -563,8 +607,20 @@ document.addEventListener('DOMContentLoaded', function() {
 function createCampaignInput(index) {
     const state = campaignState[index] || {};
 
+    function extractCampaignTitle(campaignInfo) {
+        const match = campaignInfo.match(/^(.*?)(\s+\d+)$/m);
+        if (match) {
+            const [, name, id] = match;
+            return `${name.trim()} ${id.trim()}`;
+        }
+        return '';
+    }
+
+    const campaignTitle = state.campaignInfo ? extractCampaignTitle(state.campaignInfo) : `Campaign ${index + 1}`;
+
     function updateSentenceModeUI() {
-        const sentenceModeToggle = document.getElementById(`sentenceModeStandard${index}`);
+        const isCustom = document.getElementById(`customToggle${index}`).checked;
+        const sentenceModeToggle = document.getElementById(`sentenceMode${index}`);
         const textUnderTitleLabel = document.getElementById(`textUnderTitleLabel${index}`);
         const textUnderTitleInput = document.getElementById(`textUnderTitle${index}`);
         
@@ -580,52 +636,40 @@ function createCampaignInput(index) {
 
     return `
         <div class="campaign-item">
-            <div class="campaign-header">
-                <h3>Campaign ${index + 1}</h3>
-                <div class="toggle-container">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="customToggle${index}" onchange="toggleCustomFields(${index})" ${state.isCustom ? 'checked' : ''}>
-                        <span class="slider"></span>
-                    </label>
-                    <div class="tooltip-wrapper">
-                        <span>Custom</span>
-                        <span class="tooltip-text">Toggle for custom</span>
-                    </div>
-                </div>
+            <h3 class="campaign-header">${campaignTitle}</h3>
+            <div class="toggle-container">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="customToggle${index}" name="customToggle${index}" ${state.isCustom ? 'checked' : ''} onchange="toggleCustomFields(${index})">
+                    <span class="slider"></span>
+                </label>
+                <span>Custom Campaign</span>
             </div>
             <div class="standard-fields" id="standardFields${index}" style="display: ${state.isCustom ? 'none' : 'block'}">
                 <label for="updateType${index}">Update Type:</label>
                 <select id="updateType${index}" name="updateType${index}">
                     <option value="None" ${state.updateType === 'None' ? 'selected' : ''}>None</option>
-                    <option value="Rate Change" ${state.updateType === 'Rate Change' ? 'selected' : ''}>Rate Change</option>
-                    <option value="New Campaign" ${state.updateType === 'New Campaign' ? 'selected' : ''}>New Campaign</option>
-                    <option value="Asset Update" ${state.updateType === 'Asset Update' ? 'selected' : ''}>Asset Update</option>
-                    <option value="Important Update" ${state.updateType === 'Important Update' ? 'selected' : ''}>Important Update</option>
+                    <option value="New" ${state.updateType === 'New' ? 'selected' : ''}>New</option>
+                    <option value="Update" ${state.updateType === 'Update' ? 'selected' : ''}>Update</option>
                 </select>
 
                 <label for="campaignInfo${index}">Paste "Copy Image" from Admin:</label>
-                <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="2" 
-                          style="font-size: 0.9em; resize: vertical;" 
-                          placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
+                <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="3" placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
 
-           
-
-                <div class="toggle-container standard-only">
+                <div class="toggle-container">
                     <label class="toggle-switch">
                         <input type="checkbox" id="sentenceModeStandard${index}" name="sentenceModeStandard${index}" ${state.sentenceMode ? 'checked' : ''} onchange="updateSentenceModeUI${index}()">
                         <span class="slider"></span>
                     </label>
-                    <div class="tooltip-wrapper">
-                        <span>Sentence Mode</span>
-                        <span class="tooltip-text">Toggle for sentence mode</span>
-                    </div>
+                    <span>Sentence Mode</span>
                 </div>
+
                 <label for="textUnderTitle${index}" id="textUnderTitleLabel${index}">
                     ${state.sentenceMode ? 'Sentence After Title:' : 'Text Under Title:'}
                 </label>
                 <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="3" 
                           style="font-size: 0.9em; resize: vertical;"
                           placeholder="${state.sentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title'}">${state.textUnderTitle || ''}</textarea>
+
                 <div class="form-row">
                     <div class="checkbox-container">
                         <input type="checkbox" id="highlightStandard${index}" name="highlightStandard${index}" ${state.highlight ? 'checked' : ''}>
@@ -649,6 +693,21 @@ function createCampaignInput(index) {
                 <label for="customTitle${index}">Title:</label>
                 <input type="text" id="customTitle${index}" name="customTitle${index}" value="${state.customTitle || ''}" placeholder="Enter custom title">
 
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sentenceMode${index}" name="sentenceMode${index}" ${state.sentenceMode ? 'checked' : ''} onchange="updateSentenceModeUI${index}()">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Sentence Mode</span>
+                </div>
+
+                <label for="textUnderTitle${index}" id="textUnderTitleLabel${index}">
+                    ${state.sentenceMode ? 'Sentence After Title:' : 'Text Under Title:'}
+                </label>
+                <textarea id="textUnderTitle${index}" name="textUnderTitle${index}" rows="3" 
+                          style="font-size: 0.9em; resize: vertical;"
+                          placeholder="${state.sentenceMode ? 'Enter sentence text' : 'Enter text to appear under the title'}">${state.textUnderTitle || ''}</textarea>
+
                 <label for="customBodyText${index}">Custom Text:</label>
                 <textarea id="customBodyText${index}" name="customBodyText${index}" rows="3" placeholder="Enter custom body text">${state.customBodyText || ''}</textarea>
 
@@ -670,17 +729,14 @@ function toggleCustomFields(index) {
     const customToggle = document.getElementById(`customToggle${index}`);
     const standardFields = document.getElementById(`standardFields${index}`);
     const customFields = document.getElementById(`customFields${index}`);
-    const standardOnlyCheckboxes = standardFields.querySelectorAll('.standard-only');
 
     if (customToggle && standardFields && customFields) {
         if (customToggle.checked) {
             standardFields.style.display = 'none';
             customFields.style.display = 'block';
-            standardOnlyCheckboxes.forEach(checkbox => checkbox.style.display = 'none');
         } else {
             standardFields.style.display = 'block';
             customFields.style.display = 'none';
-            standardOnlyCheckboxes.forEach(checkbox => checkbox.style.display = 'block');
         }
         updateCampaignState();
     }
@@ -691,6 +747,15 @@ function updateCampaignState(newNumCampaigns) {
     const numCampaigns = newNumCampaigns || parseInt(document.getElementById('numCampaigns').value);
     console.log('Number of campaigns:', numCampaigns);
     
+    function extractCampaignTitle(campaignInfo) {
+        const match = campaignInfo.match(/^(.*?)(\s+\d+)$/m);
+        if (match) {
+            const [, name, id] = match;
+            return `${name.trim()} ${id.trim()}`;
+        }
+        return '';
+    }
+
     for (let i = 0; i < numCampaigns; i++) {
         const customToggle = document.getElementById(`customToggle${i}`);
         if (customToggle) {
@@ -698,23 +763,36 @@ function updateCampaignState(newNumCampaigns) {
             const highlight = isCustom 
                 ? document.getElementById(`highlightCustom${i}`).checked
                 : document.getElementById(`highlightStandard${i}`).checked;
+            const campaignInfo = document.getElementById(`campaignInfo${i}`)?.value || '';
+            const campaignTitle = extractCampaignTitle(campaignInfo) || `Campaign ${i + 1}`;
+            
+            // Update the campaign header with the new title
+            const campaignHeader = document.querySelector(`#campaignInputs .campaign-item:nth-child(${i + 1}) .campaign-header`);
+            if (campaignHeader) {
+                campaignHeader.textContent = campaignTitle;
+            }
+
             campaignState[i] = isCustom ? {
                 isCustom: true,
                 customTitle: document.getElementById(`customTitle${i}`)?.value || '',
+                textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
                 customBodyText: document.getElementById(`customBodyText${i}`)?.value || '',
                 customImageUrl: document.getElementById(`customImageUrl${i}`)?.value || '',
                 customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
-                highlight: highlight
+                highlight: highlight,
+                sentenceMode: document.getElementById(`sentenceMode${i}`).checked,
+                campaignTitle: campaignTitle
             } : {
                 isCustom: false,
                 updateType: document.getElementById(`updateType${i}`)?.value || '',
-                campaignInfo: document.getElementById(`campaignInfo${i}`)?.value || '',
+                campaignInfo: campaignInfo,
                 textUnderTitle: document.getElementById(`textUnderTitle${i}`)?.value || '',
                 highlight: highlight,
                 showRate: document.getElementById(`showRateStandard${i}`).checked,
                 showThumbnail: document.getElementById(`showThumbnailStandard${i}`).checked,
                 showSubtitle: document.getElementById(`showSubtitle${i}`).checked,
-                sentenceMode: document.getElementById(`sentenceModeStandard${i}`).checked
+                sentenceMode: document.getElementById(`sentenceModeStandard${i}`).checked,
+                campaignTitle: campaignTitle
             };
         } else {
             console.error(`customToggle${i} not found`);
@@ -733,9 +811,23 @@ function initializeCampaignInputs() {
         campaignInputs.innerHTML += createCampaignInput(i);
     }
     
-    // Add this loop to initialize the UI for each campaign
     for (let i = 0; i < numCampaigns; i++) {
         window[`updateSentenceModeUI${i}`]();
+        
+        const campaignInfoInput = document.getElementById(`campaignInfo${i}`);
+        if (campaignInfoInput) {
+            campaignInfoInput.addEventListener('input', function() {
+                updateCampaignState();
+            });
+            
+            // Add paste event listener
+            campaignInfoInput.addEventListener('paste', function(e) {
+                // Use setTimeout to ensure the pasted content is available
+                setTimeout(() => {
+                    updateCampaignState();
+                }, 0);
+            });
+        }
     }
 }
 
@@ -861,7 +953,7 @@ function generateEmail() {
         } else {
             const campaignInfo = state.campaignInfo;
             const campaignID = campaignInfo.match(/campaign_id=(\d+)/)[1];
-            const campaignName = campaignInfo.match(/<h3>(.*?)<\/h3>/)[1];
+            const campaignName = state.campaignTitle || `Campaign ${i + 1}`;
             const landingPage = campaignInfo.match(/src="(.*?)"/)[1];
             const subtitle = campaignInfo.match(/<p>(.*?)<\/p>/)[1];
             const commissionDetails = campaignInfo.match(/<p>(.*?)<\/p>/)[2];
@@ -895,6 +987,15 @@ function generateEmail() {
         `;
     }
 
+    // Get the sign-off text
+    let signOffText = '';
+    const useAutoSignOff = document.getElementById('useAutoSignOff').checked;
+    if (useAutoSignOff) {
+        signOffText = document.getElementById('autoSignOffSelect').value;
+    } else {
+        signOffText = document.getElementById('customSignOff').value;
+    }
+
     htmlOutput = `
         <div style="font-family:Arial, sans-serif; max-width:600px; margin:0 auto;">
             <div style="background-color:#dd1e31; color:white; padding:10px; text-align:center; font-size:18px; font-weight:bold;">
@@ -904,6 +1005,9 @@ function generateEmail() {
                 ${textAboveCampaigns ? `<p style="font-size:14px; margin-bottom:20px;">${nl2br(textAboveCampaigns)}</p>` : ''}
                 ${htmlOutput}
                 ${textBeforeSignOff ? `<p style="font-size:14px; margin-top:20px;">${nl2br(textBeforeSignOff)}</p>` : ''}
+                <p style="font-size: 14px; color: #333333; margin-top: 20px;">
+                    ${nl2br(signOffText)}
+                </p>
             </div>
         </div>
     `;
@@ -1248,6 +1352,15 @@ function generateEmail() {
 
     campaignsHtml += '</table>';
 
+    // Get the sign-off text
+    let signOffText = '';
+    const useAutoSignOff = document.getElementById('useAutoSignOff').checked;
+    if (useAutoSignOff) {
+        signOffText = document.getElementById('autoSignOffSelect').value;
+    } else {
+        signOffText = document.getElementById('customSignOff').value;
+    }
+
     const htmlOutput = `
 ${subjectTitle}
 
@@ -1273,8 +1386,9 @@ ${subjectTitle}
                                 <p style="font-size:14px; margin-bottom:20px;">${pluralizeText(textAboveCampaigns, numCampaigns)}</p>
                                 ${campaignsHtml}
                                 <p style="font-size:14px; margin-top:20px;">${pluralizeText(afterLearnMore, numCampaigns)}</p>
-                                <p style="font-size:14px; margin-top:20px;">If you have any questions, please contact your Affiliate Manager.</p>
-                                <p style="font-size:14px; margin-top:20px;">Thanks,</p>
+                                <p style="font-size: 14px; color: #333333; margin-top: 20px;">
+                                    ${nl2br(signOffText)}
+                                </p>
                             </td>
                         </tr>
                     </table>
