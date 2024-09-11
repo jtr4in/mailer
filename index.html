@@ -654,8 +654,15 @@ function createCampaignInput(index) {
                 <span>Custom Campaign</span>
             </div>
             <div class="standard-fields" id="standardFields${index}" style="display: ${state.isCustom ? 'none' : 'block'}">
-          
-                
+                <label for="updateType${index}">Update Type:</label>
+                <select id="updateType${index}" name="updateType${index}">
+                   <option value="None" ${state.updateType === 'None' ? 'selected' : ''}>None</option>
+                    <option value="New" ${state.updateType === 'New' ? 'selected' : ''}>New</option>
+                    <option value="Update" ${state.updateType === 'Update' ? 'selected' : ''}>Asset Update</option>
+					<option value="Update" ${state.updateType === 'Update' ? 'selected' : ''}>Rate Change</option>
+					<option value="Update" ${state.updateType === 'Update' ? 'selected' : ''}>Promotion</option>
+					<option value="Update" ${state.updateType === 'Update' ? 'selected' : ''}>Maintenance</option>
+                </select>
 
                 <label for="campaignInfo${index}">Paste "Copy Image" from Admin:</label>
                 <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="3" placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
