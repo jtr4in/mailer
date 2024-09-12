@@ -613,7 +613,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const htmlContent = document.getElementById('output').innerHTML;
         navigator.clipboard.writeText(htmlContent).then(() => {
             // Optionally, you can add some visual feedback here
-                    });
+            alert('HTML copied to clipboard!');
+        });
     });
 
     // Add event listener for the Copy Link button
@@ -1026,67 +1027,115 @@ function generateEmail() {
     const columns = parseInt(document.getElementById('columns').value);
     const noThumbnails = document.getElementById('noThumbnails').checked;
 
-    let htmlOutput = '';
-    let cellContent = '';
-    let cellWidth = 100 / columns;
+    const totalWidth = 600;
+    const cellWidth = Math.floor(totalWidth / columns);
+
+    let campaignsHtml = `
+    <table cellspacing="0" cellpadding="0" border="0" width="${totalWidth}" style="width:${totalWidth}px;">
+    `;
 
     for (let i = 0; i < numCampaigns; i++) {
-        const state = campaignState[i];
-        if (!state) {
-            console.error(`Campaign state not found for index ${i}`);
-            continue;
+        if (i % columns === 0) {
+            campaignsHtml += '<tr>';
         }
 
+        const state = campaignState[i];
+        let cellContent = '';
+
+        const highlightStyle = state.highlight ? 'background-color: #dd1e31; color: white;' : '';
+
         if (state.isCustom) {
+            const titleContent = state.customLearnMoreUrl 
+                ? `<a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">${nl2br(state.customTitle)}</a>`
+                : nl2br(state.customTitle);
+            
             cellContent = `
-                <div style="background-color:${state.highlight ? '#dd1e31' : '#ffffff'}; color:${state.highlight ? 'white' : '#333333'}; padding:10px; border-radius:5px; margin-bottom:10px;">
-                    <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
-                        <a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                            ${nl2br(state.customTitle)}
-                        </a>
-                    </h3>
-                    <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.customBodyText)}</p>
-                    <a href="${state.customLearnMoreUrl}">
-                        <img src="${state.customImageUrl}" alt="${state.customTitle} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
-                    </a>
-                </div>
-            `;
-        } else {
-            const campaignInfo = state.campaignInfo;
-            const campaignID = campaignInfo.match(/campaign_id=(\d+)/)[1];
-            const campaignName = state.campaignTitle || `Campaign ${i + 1}`;
-            const landingPage = campaignInfo.match(/src="(.*?)"/)[1];
-            const subtitle = campaignInfo.match(/<p>(.*?)<\/p>/)[1];
-            const commissionDetails = campaignInfo.match(/<p>(.*?)<\/p>/)[2];
-
-            const titleContent = state.updateType === 'None' ? campaignName : `${state.updateType}: ${campaignName}`;
-
-            cellContent = `
-                <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
-                    <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                        ${nl2br(titleContent)}
-                    </a>
-                    ${state.sentenceMode ? `<span style="font-weight: normal;">${state.textUnderTitle ? nl2br(state.textUnderTitle) : ''}</span>` : ''}
+                <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px;">
+                    ${titleContent}
                 </h3>
-                ${!state.sentenceMode && state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(subtitle)}</p>` : ''}
-                ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(commissionDetails)}</p>` : ''}
-                ${!state.sentenceMode ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle || '')}</p>` : ''}
-                ${state.showThumbnail && !noThumbnails && landingPage ? `
-                    <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
-                        <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
+                <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0;">${nl2br(state.customBodyText)}</p>
+                ${!noThumbnails && !state.hideThumbnail && state.customImageUrl ? `
+                    <a href="${state.customLearnMoreUrl || '#'}">
+                        <img src="${state.customImageUrl}" alt="${state.customTitle}" width="${cellWidth - 20}" style="display:block; margin:10px auto;" />
                     </a>
                 ` : ''}
             `;
+        } else {
+            const campaignInfo = extractCampaignInfo(state.campaignInfo || '');
+            let campaignName = campaignInfo.name;
+            let campaignID = campaignInfo.id;
+            let campaignCountry = campaignInfo.country;
+            let subtitle = campaignInfo.subtitle;
+            let landingPage = '';
+            let commissionDetails = campaignInfo.commissionDetails;
+
+            const urlMatch = (state.campaignInfo || '').match(/(https:\/\/maxbounty\.com\/getlp\.asp\?m=\d+&o=\d+&l=\d+&s=)full/);
+            if (urlMatch) {
+                landingPage = urlMatch[1] + 'thumb';
+            } else {
+                const anyUrlMatch = (state.campaignInfo || '').match(/(https?:\/\/[^\s]+)/);
+                if (anyUrlMatch) {
+                    landingPage = anyUrlMatch[1];
+                }
+            }
+
+            if (campaignName && campaignID) {
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignCountry})`;
+                
+                if (state.sentenceMode) {
+                    const sentenceContent = state.textUnderTitle ? nl2br(state.textUnderTitle) : '';
+                    const hyperlinkStart = state.hyperlinkSentence ? `<a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">` : '';
+                    const hyperlinkEnd = state.hyperlinkSentence ? '</a>' : '';
+                    const h2Style = state.h2Sentence ? 'font-size: 18px; font-weight: bold;' : 'font-size: 14px;';
+
+                    cellContent = `
+                        <div style="${h2Style} color:${state.highlight ? 'white' : '#333333'}; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                                ${nl2br(titleContent)}
+                            </a>
+                            ${hyperlinkStart}
+                                <span style="font-weight: ${state.h2Sentence ? 'bold' : 'normal'};"> ${sentenceContent}</span>
+                            ${hyperlinkEnd}
+                        </div>
+                        ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(commissionDetails)}</p>` : ''}
+                        ${state.showThumbnail && !noThumbnails && landingPage ? `
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
+                                <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
+                            </a>
+                        ` : ''}
+                    `;
+                } else {
+                    cellContent = `
+                        <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                                ${nl2br(titleContent)}
+                            </a>
+                        </h3>
+                        ${state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(subtitle)}</p>` : ''}
+                        ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(commissionDetails)}</p>` : ''}
+                        <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
+                        ${state.showThumbnail && !noThumbnails && landingPage ? `
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
+                                <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
+                            </a>
+                        ` : ''}
+                    `;
+                }
+            }
         }
 
-        htmlOutput += `
-            <div style="width:${cellWidth}%; display:inline-block; vertical-align:top; padding:0 10px; box-sizing:border-box;">
-                <div style="background-color:${state.highlight ? '#dd1e31' : '#ffffff'}; color:${state.highlight ? 'white' : '#333333'}; padding:10px; border-radius:5px; margin-bottom:10px;">
-                    ${cellContent}
-                </div>
-            </div>
+        campaignsHtml += `
+            <td width="${cellWidth}" valign="top" style="padding:10px; ${highlightStyle} word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                ${cellContent}
+            </td>
         `;
+
+        if ((i + 1) % columns === 0 || i === numCampaigns - 1) {
+            campaignsHtml += '</tr>';
+        }
     }
+
+    campaignsHtml += '</table>';
 
     // Get the sign-off text
     let signOffText = '';
@@ -1097,15 +1146,15 @@ function generateEmail() {
         signOffText = document.getElementById('customSignOff').value;
     }
 
-    htmlOutput = `
+    const htmlOutput = `
         <div style="font-family:Arial, sans-serif; max-width:600px; margin:0 auto;">
             <div style="background-color:#dd1e31; color:white; padding:10px; text-align:center; font-size:18px; font-weight:bold;">
                 ${subjectTitle}
             </div>
             <div style="padding:20px;">
-                ${textAboveCampaigns ? `<p style="font-size:14px; margin-bottom:20px;">${nl2br(textAboveCampaigns)}</p>` : ''}
-                ${htmlOutput}
-                ${textBeforeSignOff ? `<p style="font-size:14px; margin-top:20px;">${nl2br(textBeforeSignOff)}</p>` : ''}
+                ${textAboveCampaigns ? `<p style="font-size:14px; margin-bottom:20px;">${nl2br(pluralizeText(textAboveCampaigns, numCampaigns))}</p>` : ''}
+                ${campaignsHtml}
+                ${textBeforeSignOff ? `<p style="font-size:14px; margin-top:20px;">${nl2br(pluralizeText(textBeforeSignOff, numCampaigns))}</p>` : ''}
                 <p style="font-size: 14px; color: #333333; margin-top: 20px;">
                     ${nl2br(signOffText)}
                 </p>
@@ -1113,12 +1162,12 @@ function generateEmail() {
         </div>
     `;
 
-    const output = document.getElementById('output');
-    if (!output) {
+    const outputElement = document.getElementById('output');
+    if (!outputElement) {
         console.error('output element not found');
         return;
     }
-    output.innerHTML = htmlOutput;
+    outputElement.innerHTML = htmlOutput;
     console.log('Email generated and inserted into output');
     
     const copyHtmlBtn = document.getElementById('copyHtml');
@@ -1241,7 +1290,23 @@ function extractCampaignInfo(campaignInfo) {
 }
 
 function pluralizeText(text, numCampaigns) {
-    if (numCampaigns <= 1) return text;
+    if (numCampaigns <= 1) {
+        return text
+            .replace(/these campaigns/g, "this campaign")
+            .replace(/These campaigns/g, "This campaign")
+            .replace(/the following campaigns/g, "the following campaign")
+            .replace(/The following campaigns/g, "The following campaign")
+            .replace(/these great opportunities/g, "this great opportunity")
+            .replace(/These great opportunities/g, "This great opportunity")
+            .replace(/campaigns are/g, "campaign is")
+            .replace(/Campaigns are/g, "Campaign is")
+            .replace(/campaigns have/g, "campaign has")
+            .replace(/Campaigns have/g, "Campaign has")
+            .replace(/campaigns fit/g, "campaign fits")
+            .replace(/Campaigns fit/g, "Campaign fits")
+            .replace(/campaigns could/g, "campaign could")
+            .replace(/Campaigns could/g, "Campaign could");
+    }
 
     return text
         .replace(/this campaign/g, "these campaigns")
@@ -1257,11 +1322,7 @@ function pluralizeText(text, numCampaigns) {
         .replace(/campaign fits/g, "campaigns fit")
         .replace(/Campaign fits/g, "Campaigns fit")
         .replace(/campaign could/g, "campaigns could")
-        .replace(/Campaign could/g, "Campaigns could")
-        .replace(/campaigns is/g, "campaigns are")
-        .replace(/Campaigns is/g, "Campaigns are")
-        .replace(/campaigns has/g, "campaigns have")
-        .replace(/Campaigns has/g, "Campaigns have");
+        .replace(/Campaign could/g, "Campaigns could");
 }
 
 function generateEmail() {
@@ -1325,8 +1386,8 @@ function generateEmail() {
     const columns = parseInt(columnsSelect.value);
     console.log('Number of columns:', columns);
 
-    const output = document.getElementById('output');
-    if (!output) {
+    const outputElement = document.getElementById('output');
+    if (!outputElement) {
         console.error('output element not found');
         return;
     }
@@ -1511,7 +1572,7 @@ ${subjectTitle}
     `;
 
     console.log('Final HTML output:', htmlOutput);
-    output.innerHTML = htmlOutput;
+    outputElement.innerHTML = htmlOutput;
     
     const copyHtmlBtn = document.getElementById('copyHtml');
     const copyLinkBtn = document.getElementById('copyLink');
@@ -1598,7 +1659,7 @@ function copyLink() {
     
     // Copy the URL to clipboard
     navigator.clipboard.writeText(currentUrl.toString()).then(() => {
-        
+        alert('Link copied to clipboard!');
     }).catch(err => {
         console.error('Failed to copy link: ', err);
         alert('Failed to copy link. Please try again.');
