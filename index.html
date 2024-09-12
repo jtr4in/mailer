@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Affiliate Mailer Builder</title>
     <style>
-    :root {
+        :root {
             --primary-color: #dd1e31;
             --primary-hover: #b5182a;
             --background-color: #f0f0f0;
@@ -15,19 +15,21 @@
 
         body {
             font-family: Arial, sans-serif;
-            max-width: 1200px;
+            max-width: 1800px;
             margin: 0 auto;
             padding: 20px;
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
             font-size: 16px;
+            display: flex;
+            gap: 40px;
         }
 
         h2 {
             color: var(--primary-color);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         select, textarea, input[type="text"] {
@@ -56,18 +58,19 @@
 
         .campaign-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
 
         .campaign-item {
             border: 1px solid var(--border-color);
-            padding: 20px;
+            padding: 10px;
             border-radius: 5px;
             background-color: #ffffff;
             transition: all 0.3s ease;
             opacity: 0;
             animation: fadeIn 0.5s ease forwards;
+            margin-bottom: 10px;
         }
 
         @keyframes fadeIn {
@@ -148,7 +151,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .toggle-switch {
@@ -207,7 +210,7 @@
     .toggle-container {
         display: flex;
         align-items: center;
-        margin-bottom: 5px;
+        margin-bottom: 3px;
     }
 
     .tooltip-wrapper {
@@ -275,221 +278,249 @@
     #customSignOff {
         resize: vertical;
     }
+
+    #inputSection {
+        width: 50%;
+        padding-right: 20px;
+    }
+
+    #previewSection {
+        width: 50%;
+        position: sticky;
+        top: 20px;
+        align-self: flex-start;
+    }
+
+    #output {
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 5px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
 </style>
 </head>
 <body>
-    <h2><a href="https://admin.maxbounty.com/affiliates/mailer" style="text-decoration: none; color: var(--primary-color);">Affiliate Mailer Builder</a></h2>
+    <div id="inputSection">
+        <h2><a href="https://admin.maxbounty.com/affiliates/mailer" style="text-decoration: none; color: var(--primary-color);">Affiliate Mailer Builder</a></h2>
 
-    <form id="emailBuilderForm">
-        <div class="checkbox-container">
-            <input type="checkbox" id="useAutoSubject" name="useAutoSubject" checked>
-            <label for="useAutoSubject" class="tooltip"> Auto Subject Title
-                <span class="tooltiptext">Choose from predefined subject titles</span>
-            </label>
-        </div>
-
-        <div id="subjectTitleContainer" style="display: none;">
-            <label for="subjectTitle">Subject Title:</label>
-            <input type="text" id="subjectTitle" name="subjectTitle" placeholder="Enter email subject title">
-        </div>
-
-        <div id="autoSubjectContainer">
-        
-    <select id="autoSubjectSelect" name="autoSubjectSelect">
-    <option value="">Select a subject title</option>
-    
-    <optgroup label="Campaign Updates" style="font-weight: bold;">
-    </optgroup>
-    <option value="Important Rate Changes for {campaign}">Important Rate Changes for {campaign}</option>
-    <option value="New Assets Available for {campaign}">New Assets Available for {campaign}</option>
-    <option value="Upcoming Changes: {campaign}">Upcoming Changes: {campaign}</option>
-    
-    <optgroup label="Promotions" style="font-weight: bold;">
-    </optgroup>
-    <option value="Special Offer: Updated Rates for {campaign}">Special Offer: Updated Rates for {campaign}</option>
-    <option value="New Promotional Assets Now Available for {campaign}">New Promotional Assets Now Available for {campaign}</option>
-    <option value="Boost Your Commissions with {campaign}">Boost Your Commissions with {campaign}</option>
-
-    <optgroup label="Seasonal" style="font-weight: bold;">
-    </optgroup>
-    <option value="Holiday Prep: {campaign}">Holiday Prep: {campaign}</option>
-    <option value="Prepare for the Season with {campaign}">Prepare for the Season with {campaign}</option>
-    <option value="Seasonal Spotlight: {campaign} ">Seasonal Spotlight: {campaign}</option>
-
-    <optgroup label="Resources" style="font-weight: bold;">
-    </optgroup>
-    <option value="Top Tips for {campaign}">Top Tips for {campaign}</option>
-    <option value="Exclusive Coupon Codes for {campaign}"> Exclusive Coupon Codes for {campaign} </option>
-    <option value="New Resources Available for {campaign}">New Assets Available for {campaign}</option>
-
-    <optgroup label="Pauses & Restarts" style="font-weight: bold;">
-    </optgroup>
-    <option value="Temporary Pause: {campaign}">Temporary Pause: {campaign} </option>
-    <option value="Heads Up: {campaign} Restarting Soon">Heads Up, we're restarting {campaign}</option>
-    <option value="Pausing {campaign}: What You Need to Know">Pausing {campaign}: What You Need to Know</option>
-
-    <optgroup label="Rate Changes" style="font-weight: bold;">
-    </optgroup>
-    <option value="New Payout Rates for {campaign}">New Payout Rates for {campaign}</option>
-    <option value="Rate Adjustment Alert: {campaign}">Rate Adjustment Alert: {campaign}</option>
-    <option value="Boost Your Earnings: New Rates for {campaign}">Boost Your Earnings: New Rates for {campaign}</option>
-</select>
-
-
-
-        </div>
-
-        <!-- New checkbox and dropdown for Auto Email Text Above All -->
-        <div class="checkbox-container">
-            <input type="checkbox" id="useAutoTextAbove" name="useAutoTextAbove" checked>
-            <label for="useAutoTextAbove" class="tooltip">Auto Text Before Campaigns
-                <span class="tooltiptext">Choose from predefined text options</span>
-            </label>
-        </div>
-
-        <div id="textAboveContainer" style="display: none;">
-           
-            <textarea id="textAboveCampaigns" placeholder="Enter text to appear above all campaigns" rows="3" style="width: 100%; margin-bottom: 20px;"></textarea>
-        </div>
-
-        <div id="autoTextAboveContainer">
-            <select id="autoTextAboveSelect" name="autoTextAboveSelect">
-    <option value="">Select a text option</option>
-    
-    <optgroup label="General Updates" style="font-weight: bold;">
-    </optgroup>
-    <option value="We have an important update regarding the following campaign that you'll want to know about:">We have an important update regarding the following campaign that you'll want to know about:</option>
-    <option value="Attention affiliates! There's been a significant rate change for the following campaign. Here are the details:">Attention affiliates! There's been a significant rate change for the following campaign. Here are the details:</option>
-    <option value="Please take note of the new restrictions implemented for the following campaign. These changes are crucial for your promotions:">Please take note of the new restrictions implemented for the following campaign. These changes are crucial for your promotions:</option>
-    <option value="We've made some changes to our campaign structure. The following campaign is now by request only. Here's what you need to know:">We've made some changes to our campaign structure. The following campaign is now by request only. Here's what you need to know:</option>
-    <option value="Great news! We've adjusted the payout structure for the following campaign. This could mean increased earnings for you:">Great news! We've adjusted the payout structure for the following campaign. This could mean increased earnings for you:</option>
-    <option value="We're excited to announce new targeting options for the following campaign. This opens up fresh opportunities for your promotions:">We're excited to announce new targeting options for the following campaign. This opens up fresh opportunities for your promotions:</option>
-    <option value="Important notice: The following campaign has been temporarily paused. Don't worry, we'll keep you updated on its status:">Important notice: The following campaign has been temporarily paused. Don't worry, we'll keep you updated on its status:</option>
-    <option value="Exciting news! A popular campaign is making a comeback. Get ready to promote the following campaign once again:">Exciting news! A popular campaign is making a comeback. Get ready to promote the following campaign once again:</option>
-    
-    <optgroup label="Personalized Recommendations" style="font-weight: bold;">
-    </optgroup>
-    <option value="Based on your stellar performance history, we've handpicked this campaign just for you. We believe it aligns perfectly with your strengths:">Based on your stellar performance history, we've handpicked this campaign just for you. We believe it aligns perfectly with your strengths:</option>
-    <option value="Our data shows this campaign is converting exceptionally well. As one of our valued affiliates, we wanted to bring it to your attention:">Our data shows this campaign is converting exceptionally well. As one of our valued affiliates, we wanted to bring it to your attention:</option>
-    <option value="We've analyzed your traffic patterns, and we're confident this campaign will resonate with your audience. Take a look:">We've analyzed your traffic patterns, and we're confident this campaign will resonate with your audience. Take a look:</option>
-    <option value="Want to take your promotions to the next level? This campaign has been delivering outstanding results. Here's why you should consider it:">Want to take your promotions to the next level? This campaign has been delivering outstanding results. Here's why you should consider it:</option>
-    <option value="We've found a perfect match! This campaign aligns beautifully with your audience demographics. Here are the details:">We've found a perfect match! This campaign aligns beautifully with your audience demographics. Here are the details:</option>
-    <option value="Looking to diversify your portfolio? This campaign could be the key to improving your overall performance. Check it out:">Looking to diversify your portfolio? This campaign could be the key to improving your overall performance. Check it out:</option>
-    <option value="Ready to supercharge your earnings? We've identified these top-performing campaigns that could give your profits a significant boost:">Ready to supercharge your earnings? We've identified these top-performing campaigns that could give your profits a significant boost:</option>
-</select>
-        </div>
-
-        <div class="form-row">
-            <div>
-                <label for="numCampaigns"># of Campaigns:</label>
-                <select id="numCampaigns" name="numCampaigns">
-                    <option value="1">1 Campaign</option>
-                    <option value="2">2 Campaigns</option>
-                    <option value="3">3 Campaigns</option>
-                    <option value="4">4 Campaigns</option>
-                    <option value="5">5 Campaigns</option>
-                    <option value="6">6 Campaigns</option>
-                    <option value="7">7 Campaigns</option>
-                    <option value="8">8 Campaigns</option>
-                    <option value="9">9 Campaigns</option>
-                    <option value="10">10 Campaigns</option>
-                    <option value="11">11 Campaigns</option>
-                    <option value="12">12 Campaigns</option>
-                </select>
-            </div>
-            <div>
-                <label for="columns">Number of Columns:</label>
-                <select id="columns" name="columns">
-                    <option value="1" selected>1 Column</option>
-                    <option value="2">2 Columns</option>
-                    <option value="3">3 Columns</option>
-                </select>
-            </div>
+        <form id="emailBuilderForm">
             <div class="checkbox-container">
-                <input type="checkbox" id="noThumbnails" name="noThumbnails">
-                <label for="noThumbnails">No Thumbnails</label>
+                <input type="checkbox" id="useAutoSubject" name="useAutoSubject" checked>
+                <label for="useAutoSubject" class="tooltip"> Auto Subject Title
+                    <span class="tooltiptext">Choose from predefined subject titles</span>
+                </label>
             </div>
-        </div>
 
-        <div id="campaignInputs" class="campaign-grid"></div>
+            <div id="subjectTitleContainer" style="display: none;">
+                <label for="subjectTitle">Subject Title:</label>
+                <input type="text" id="subjectTitle" name="subjectTitle" placeholder="Enter email subject title">
+            </div>
 
-        <!-- New checkbox and dropdown for Auto Text Before Sign Off -->
-        <div class="checkbox-container">
-            <input type="checkbox" id="useAutoTextBeforeSignOff" name="useAutoTextBeforeSignOff" checked>
-            <label for="useAutoTextBeforeSignOff" class="tooltip">Auto Text After Campaigns
-                <span class="tooltiptext">Choose from predefined text options</span>
-            </label>
-        </div>
+            <div id="autoSubjectContainer">
+            
+                <select id="autoSubjectSelect" name="autoSubjectSelect">
+                    <option value="">Select a subject title</option>
+                    
+                    <optgroup label="Campaign Updates" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Important Rate Changes for {campaign}">Important Rate Changes for {campaign}</option>
+                    <option value="New Assets Available for {campaign}">New Assets Available for {campaign}</option>
+                    <option value="Upcoming Changes: {campaign}">Upcoming Changes: {campaign}</option>
+                    
+                    <optgroup label="Promotions" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Special Offer: Updated Rates for {campaign}">Special Offer: Updated Rates for {campaign}</option>
+                    <option value="New Promotional Assets Now Available for {campaign}">New Promotional Assets Now Available for {campaign}</option>
+                    <option value="Boost Your Commissions with {campaign}">Boost Your Commissions with {campaign}</option>
 
-        <div id="textBeforeSignOffContainer" style="display: none;">
-            <label for="afterLearnMore">Text after campaigns:</label>
-            <textarea id="afterLearnMore" name="afterLearnMore" rows="3" placeholder="Enter text to appear after the campaigns"></textarea>
-        </div>
+                    <optgroup label="Seasonal" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Holiday Prep: {campaign}">Holiday Prep: {campaign}</option>
+                    <option value="Prepare for the Season with {campaign}">Prepare for the Season with {campaign}</option>
+                    <option value="Seasonal Spotlight: {campaign} ">Seasonal Spotlight: {campaign}</option>
 
-        <div id="autoTextBeforeSignOffContainer">
-            <select id="autoTextBeforeSignOffSelect" name="autoTextBeforeSignOffSelect">
-    <option value="">Select a text option</option>
-    
-    <optgroup label="Call to Action" style="font-weight: bold;">
-    </optgroup>
-    <option value="Don't miss out on this great opportunity. Start promoting today!">Don't miss out on this great opportunity. Start promoting today!</option>
-    <option value="This campaign is in high demand. Log in to your account and start promoting now!">This campaign is in high demand. Log in to your account and start promoting now!</option>
-    <option value="Time is of the essence! Jump on these campaigns before they're gone.">Time is of the essence! Jump on these campaigns before they're gone.</option>
-    <option value="Ready to boost your earnings? These campaigns are waiting for your promotional magic!">Ready to boost your earnings? These campaigns are waiting for your promotional magic!</option>
-    
-    <optgroup label="Support" style="font-weight: bold;">
-    </optgroup>
-    <option value="Ensure you're up-to-date with all campaign guidelines and requirements.">Ensure you're up-to-date with all campaign guidelines and requirements.</option>
-    <option value="Be sure to review your campaign performance and optimize your promotions.">Be sure to review your campaign performance and optimize your promotions.</option>
-    <option value="Need help getting started? Our support team is here to guide you through the process.">Need help getting started? Our support team is here to guide you through the process.</option>
-    <option value="Remember, we're always here to answer your questions and provide support for your promotional efforts.">Remember, we're always here to answer your questions and provide support for your promotional efforts.</option>
-    
-    <optgroup label="Performance Reminders" style="font-weight: bold;">
-    </optgroup>
-    <option value="Keep an eye on your performance metrics to maximize results.">Keep an eye on your performance metrics to maximize results.</option>
-    <option value="Don't forget to track your progress and adjust your strategies for better outcomes.">Don't forget to track your progress and adjust your strategies for better outcomes.</option>
-    <option value="Remember, consistent effort and optimization are key to long-term success in affiliate marketing.">Remember, consistent effort and optimization are key to long-term success in affiliate marketing.</option>
-    <option value="Stay proactive! Regularly analyze your campaigns and look for opportunities to improve your conversion rates.">Stay proactive! Regularly analyze your campaigns and look for opportunities to improve your conversion rates.</option>
-    
-    <optgroup label="Appreciation" style="font-weight: bold;">
-    </optgroup>
-    <option value="Your continued partnership is appreciated. Let's make this a successful month together!">Your continued partnership is appreciated. Let's make this a successful month together!</option>
-    <option value="We appreciate your hard work and dedication. Keep up the great performance!">We appreciate your hard work and dedication. Keep up the great performance!</option>
-    <option value="Thank you for being an integral part of our affiliate network. Your success is our success!">Thank you for being an integral part of our affiliate network. Your success is our success!</option>
-    <option value="We value your commitment to excellence. Together, we're achieving great things!">We value your commitment to excellence. Together, we're achieving great things!</option>
-</select>
+                    <optgroup label="Resources" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Top Tips for {campaign}">Top Tips for {campaign}</option>
+                    <option value="Exclusive Coupon Codes for {campaign}"> Exclusive Coupon Codes for {campaign} </option>
+                    <option value="New Resources Available for {campaign}">New Assets Available for {campaign}</option>
 
-        </div>
+                    <optgroup label="Pauses & Restarts" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Temporary Pause: {campaign}">Temporary Pause: {campaign} </option>
+                    <option value="Heads Up: {campaign} Restarting Soon">Heads Up, we're restarting {campaign}</option>
+                    <option value="Pausing {campaign}: What You Need to Know">Pausing {campaign}: What You Need to Know</option>
 
-        <div class="checkbox-container">
-            <input type="checkbox" id="useAutoSignOff" name="useAutoSignOff" checked>
-            <label for="useAutoSignOff" class="tooltip">Auto Sign Off
-                <span class="tooltiptext">Choose from predefined sign-off options</span>
-            </label>
-        </div>
+                    <optgroup label="Rate Changes" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="New Payout Rates for {campaign}">New Payout Rates for {campaign}</option>
+                    <option value="Rate Adjustment Alert: {campaign}">Rate Adjustment Alert: {campaign}</option>
+                    <option value="Boost Your Earnings: New Rates for {campaign}">Boost Your Earnings: New Rates for {campaign}</option>
+                </select>
 
-        <div id="customSignOffContainer" style="display: none;">
-            <label for="customSignOff">Custom Sign Off:</label>
-            <textarea id="customSignOff" name="customSignOff" rows="3" placeholder="Enter custom sign-off text"></textarea>
-        </div>
 
-        <div id="autoSignOffContainer">
-            <select id="autoSignOffSelect" name="autoSignOffSelect">
-                <option value="If you have any questions, please contact your Affiliate Manager.">If you have any questions, please contact your Affiliate Manager.</option>
-                <option value="Thank you for your continued partnership. We look forward to your success!">Thank you for your continued partnership. We look forward to your success!</option>
-                <option value="Best regards,&#10;The Affiliate Team">Best regards,&#10;The Affiliate Team</option>
-                <option value="Happy promoting!&#10;Your Affiliate Support Team">Happy promoting!&#10;Your Affiliate Support Team</option>
-                <option value="We're here to help you succeed. Don't hesitate to reach out if you need anything.">We're here to help you succeed. Don't hesitate to reach out if you need anything.</option>
-            </select>
-        </div>
 
-        <div class="form-row">
-            <button type="submit">Generate Email</button>  
+            </div>
+
+            <!-- New checkbox and dropdown for Auto Email Text Above All -->
+            <div class="checkbox-container">
+                <input type="checkbox" id="useAutoTextAbove" name="useAutoTextAbove" checked>
+                <label for="useAutoTextAbove" class="tooltip">Auto Text Before Campaigns
+                    <span class="tooltiptext">Choose from predefined text options</span>
+                </label>
+            </div>
+
+            <div id="textAboveContainer" style="display: none;">
+               
+                <textarea id="textAboveCampaigns" placeholder="Enter text to appear above all campaigns" rows="3" style="width: 100%; margin-bottom: 20px;"></textarea>
+            </div>
+
+            <div id="autoTextAboveContainer">
+                <select id="autoTextAboveSelect" name="autoTextAboveSelect">
+                    <option value="">Select a text option</option>
+                    
+                    <optgroup label="General Updates" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="We have an important update regarding the following campaign that you'll want to know about:">We have an important update regarding the following campaign that you'll want to know about:</option>
+                    <option value="Attention affiliates! There's been a significant rate change for the following campaign. Here are the details:">Attention affiliates! There's been a significant rate change for the following campaign. Here are the details:</option>
+                    <option value="Please take note of the new restrictions implemented for the following campaign. These changes are crucial for your promotions:">Please take note of the new restrictions implemented for the following campaign. These changes are crucial for your promotions:</option>
+                    <option value="We've made some changes to our campaign structure. The following campaign is now by request only. Here's what you need to know:">We've made some changes to our campaign structure. The following campaign is now by request only. Here's what you need to know:</option>
+                    <option value="Great news! We've adjusted the payout structure for the following campaign. This could mean increased earnings for you:">Great news! We've adjusted the payout structure for the following campaign. This could mean increased earnings for you:</option>
+                    <option value="We're excited to announce new targeting options for the following campaign. This opens up fresh opportunities for your promotions:">We're excited to announce new targeting options for the following campaign. This opens up fresh opportunities for your promotions:</option>
+                    <option value="Important notice: The following campaign has been temporarily paused. Don't worry, we'll keep you updated on its status:">Important notice: The following campaign has been temporarily paused. Don't worry, we'll keep you updated on its status:</option>
+                    <option value="Exciting news! A popular campaign is making a comeback. Get ready to promote the following campaign once again:">Exciting news! A popular campaign is making a comeback. Get ready to promote the following campaign once again:</option>
+                    
+                    <optgroup label="Personalized Recommendations" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Based on your stellar performance history, we've handpicked this campaign just for you. We believe it aligns perfectly with your strengths:">Based on your stellar performance history, we've handpicked this campaign just for you. We believe it aligns perfectly with your strengths:</option>
+                    <option value="Our data shows this campaign is converting exceptionally well. As one of our valued affiliates, we wanted to bring it to your attention:">Our data shows this campaign is converting exceptionally well. As one of our valued affiliates, we wanted to bring it to your attention:</option>
+                    <option value="We've analyzed your traffic patterns, and we're confident this campaign will resonate with your audience. Take a look:">We've analyzed your traffic patterns, and we're confident this campaign will resonate with your audience. Take a look:</option>
+                    <option value="Want to take your promotions to the next level? This campaign has been delivering outstanding results. Here's why you should consider it:">Want to take your promotions to the next level? This campaign has been delivering outstanding results. Here's why you should consider it:</option>
+                    <option value="We've found a perfect match! This campaign aligns beautifully with your audience demographics. Here are the details:">We've found a perfect match! This campaign aligns beautifully with your audience demographics. Here are the details:</option>
+                    <option value="Looking to diversify your portfolio? This campaign could be the key to improving your overall performance. Check it out:">Looking to diversify your portfolio? This campaign could be the key to improving your overall performance. Check it out:</option>
+                    <option value="Ready to supercharge your earnings? We've identified these top-performing campaigns that could give your profits a significant boost:">Ready to supercharge your earnings? We've identified these top-performing campaigns that could give your profits a significant boost:</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label for="numCampaigns"># of Campaigns:</label>
+                    <select id="numCampaigns" name="numCampaigns">
+                        <option value="1">1 Campaign</option>
+                        <option value="2">2 Campaigns</option>
+                        <option value="3">3 Campaigns</option>
+                        <option value="4">4 Campaigns</option>
+                        <option value="5">5 Campaigns</option>
+                        <option value="6">6 Campaigns</option>
+                        <option value="7">7 Campaigns</option>
+                        <option value="8">8 Campaigns</option>
+                        <option value="9">9 Campaigns</option>
+                        <option value="10">10 Campaigns</option>
+                        <option value="11">11 Campaigns</option>
+                        <option value="12">12 Campaigns</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="columns">Number of Columns:</label>
+                    <select id="columns" name="columns">
+                        <option value="1" selected>1 Column</option>
+                        <option value="2">2 Columns</option>
+                        <option value="3">3 Columns</option>
+                    </select>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="noThumbnails" name="noThumbnails">
+                    <label for="noThumbnails">No Thumbnails</label>
+                </div>
+            </div>
+
+            <div id="campaignInputs" class="campaign-grid"></div>
+
+            <!-- New checkbox and dropdown for Auto Text Before Sign Off -->
+            <div class="checkbox-container">
+                <input type="checkbox" id="useAutoTextBeforeSignOff" name="useAutoTextBeforeSignOff" checked>
+                <label for="useAutoTextBeforeSignOff" class="tooltip">Auto Text After Campaigns
+                    <span class="tooltiptext">Choose from predefined text options</span>
+                </label>
+            </div>
+
+            <div id="textBeforeSignOffContainer" style="display: none;">
+                <label for="afterLearnMore">Text after campaigns:</label>
+                <textarea id="afterLearnMore" name="afterLearnMore" rows="3" placeholder="Enter text to appear after the campaigns"></textarea>
+            </div>
+
+            <div id="autoTextBeforeSignOffContainer">
+                <select id="autoTextBeforeSignOffSelect" name="autoTextBeforeSignOffSelect">
+                    <option value="">Select a text option</option>
+                    
+                    <optgroup label="Call to Action" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Don't miss out on this great opportunity. Start promoting today!">Don't miss out on this great opportunity. Start promoting today!</option>
+                    <option value="This campaign is in high demand. Log in to your account and start promoting now!">This campaign is in high demand. Log in to your account and start promoting now!</option>
+                    <option value="Time is of the essence! Jump on these campaigns before they're gone.">Time is of the essence! Jump on these campaigns before they're gone.</option>
+                    <option value="Ready to boost your earnings? These campaigns are waiting for your promotional magic!">Ready to boost your earnings? These campaigns are waiting for your promotional magic!</option>
+                    
+                    <optgroup label="Support" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Ensure you're up-to-date with all campaign guidelines and requirements.">Ensure you're up-to-date with all campaign guidelines and requirements.</option>
+                    <option value="Be sure to review your campaign performance and optimize your promotions.">Be sure to review your campaign performance and optimize your promotions.</option>
+                    <option value="Need help getting started? Our support team is here to guide you through the process.">Need help getting started? Our support team is here to guide you through the process.</option>
+                    <option value="Remember, we're always here to answer your questions and provide support for your promotional efforts.">Remember, we're always here to answer your questions and provide support for your promotional efforts.</option>
+                    
+                    <optgroup label="Performance Reminders" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Keep an eye on your performance metrics to maximize results.">Keep an eye on your performance metrics to maximize results.</option>
+                    <option value="Don't forget to track your progress and adjust your strategies for better outcomes.">Don't forget to track your progress and adjust your strategies for better outcomes.</option>
+                    <option value="Remember, consistent effort and optimization are key to long-term success in affiliate marketing.">Remember, consistent effort and optimization are key to long-term success in affiliate marketing.</option>
+                    <option value="Stay proactive! Regularly analyze your campaigns and look for opportunities to improve your conversion rates.">Stay proactive! Regularly analyze your campaigns and look for opportunities to improve your conversion rates.</option>
+                    
+                    <optgroup label="Appreciation" style="font-weight: bold;">
+                    </optgroup>
+                    <option value="Your continued partnership is appreciated. Let's make this a successful month together!">Your continued partnership is appreciated. Let's make this a successful month together!</option>
+                    <option value="We appreciate your hard work and dedication. Keep up the great performance!">We appreciate your hard work and dedication. Keep up the great performance!</option>
+                    <option value="Thank you for being an integral part of our affiliate network. Your success is our success!">Thank you for being an integral part of our affiliate network. Your success is our success!</option>
+                    <option value="We value your commitment to excellence. Together, we're achieving great things!">We value your commitment to excellence. Together, we're achieving great things!</option>
+                </select>
+
+            </div>
+
+            <div class="checkbox-container">
+                <input type="checkbox" id="useAutoSignOff" name="useAutoSignOff" checked>
+                <label for="useAutoSignOff" class="tooltip">Auto Sign Off
+                    <span class="tooltiptext">Choose from predefined sign-off options</span>
+                </label>
+            </div>
+
+            <div id="customSignOffContainer" style="display: none;">
+                <label for="customSignOff">Custom Sign Off:</label>
+                <textarea id="customSignOff" name="customSignOff" rows="3" placeholder="Enter custom sign-off text"></textarea>
+            </div>
+
+            <div id="autoSignOffContainer">
+                <select id="autoSignOffSelect" name="autoSignOffSelect">
+                    <option value="If you have any questions, please contact your Affiliate Manager.">If you have any questions, please contact your Affiliate Manager.</option>
+                    <option value="Thank you for your continued partnership. We look forward to your success!">Thank you for your continued partnership. We look forward to your success!</option>
+                    <option value="Best regards,&#10;The Affiliate Team">Best regards,&#10;The Affiliate Team</option>
+                    <option value="Happy promoting!&#10;Your Affiliate Support Team">Happy promoting!&#10;Your Affiliate Support Team</option>
+                    <option value="We're here to help you succeed. Don't hesitate to reach out if you need anything.">We're here to help you succeed. Don't hesitate to reach out if you need anything.</option>
+                </select>
+            </div>
+
+            <!-- Remove this div containing the Copy HTML button -->
+            <!-- <div class="form-row">
+                <button id="copyHtml" style="display: none;">Copy HTML</button>
+            </div> -->
+        </form>
+    </div>
+
+    <div id="previewSection">
+        <div id="output"></div>
+        <div style="text-align: center; margin-top: 20px;">
             <button id="copyHtml" style="display: none;">Copy HTML</button>
         </div>
-    </form>
-
-    <div id="output"></div>
+    </div>
 
     <script>
 	let campaignState = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
@@ -503,17 +534,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('emailBuilderForm not found');
         return;
     }
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        console.log('Form submitted');
-        try {
-            updateCampaignState();
-            generateEmail();
-        } catch (error) {
-            console.error('Error in form submission:', error);
-        }
-    });
 
     // Add this new style tag to the head of the document
     const style = document.createElement('style');
@@ -591,7 +611,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('copyHtml').addEventListener('click', function() {
         const htmlContent = document.getElementById('output').innerHTML;
         navigator.clipboard.writeText(htmlContent).then(() => {
-
+            // Optionally, you can add some visual feedback here
+            alert('HTML copied to clipboard!');
         });
     });
 
@@ -607,6 +628,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (autoSignOffSelect) {
         autoSignOffSelect.value = "If you have any questions, please contact your Affiliate Manager.";
     }
+
+    // Instead, call generateEmail once on page load
+    updateCampaignState();
+    generateEmail();
 });
 
 function createCampaignInput(index) {
@@ -672,10 +697,10 @@ function createCampaignInput(index) {
                         <input type="checkbox" id="sentenceModeStandard${index}" name="sentenceModeStandard${index}" ${state.sentenceMode !== false ? 'checked' : ''} onchange="updateSentenceModeUI${index}()">
                         <span class="slider"></span>
                     </label>
-                    <span>Sentence Mode</span>
+                    <span>Sentence</span>
                     <div class="checkbox-container" style="margin-left: 10px;">
                         <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''}>
-                        <label for="hyperlinkSentence${index}">Hyperlinked</label>
+                        <label for="hyperlinkSentence${index}">Linked</label>
                     </div>
                 </div>
 
@@ -707,7 +732,7 @@ function createCampaignInput(index) {
             </div>
             <div class="custom-fields" id="customFields${index}" style="display: ${state.isCustom ? 'block' : 'none'}">
                 <label for="customTitle${index}">Title:</label>
-                <input type="text" id="customTitle${index}" name="customTitle${index}" value="${state.customTitle || ''}" placeholder="Enter custom title">
+                <textarea id="customTitle${index}" name="customTitle${index}" rows="2" placeholder="Enter custom title">${state.customTitle || ''}</textarea>
 
                 <div class="toggle-container">
                     <label class="toggle-switch">
@@ -717,7 +742,7 @@ function createCampaignInput(index) {
                     <span>Sentence Mode</span>
                     <div class="checkbox-container" style="margin-left: 10px;">
                         <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''}>
-                        <label for="hyperlinkSentence${index}">Hyperlinked</label>
+                        <label for="hyperlinkSentence${index}">Linked</label>
                     </div>
                 </div>
 
@@ -732,10 +757,10 @@ function createCampaignInput(index) {
                 <textarea id="customBodyText${index}" name="customBodyText${index}" rows="3" placeholder="Enter custom body text">${state.customBodyText || ''}</textarea>
 
                 <label for="customImageUrl${index}">Image URL:</label>
-                <input type="text" id="customImageUrl${index}" name="customImageUrl${index}" value="${state.customImageUrl || ''}" placeholder="Enter image URL">
+                <textarea id="customImageUrl${index}" name="customImageUrl${index}" rows="2" placeholder="Enter image URL">${state.customImageUrl || ''}</textarea>
 
                 <label for="customLearnMoreUrl${index}">Custom URL for Title:</label>
-                <input type="text" id="customLearnMoreUrl${index}" name="customLearnMoreUrl${index}" value="${state.customLearnMoreUrl || ''}" placeholder="Enter custom URL">
+                <textarea id="customLearnMoreUrl${index}" name="customLearnMoreUrl${index}" rows="2" placeholder="Enter custom URL">${state.customLearnMoreUrl || ''}</textarea>
                 <div class="checkbox-container">
                     <input type="checkbox" id="highlightCustom${index}" name="highlightCustom${index}" ${state.highlight ? 'checked' : ''}>
                     <label for="highlightCustom${index}">Highlight Campaign</label>
@@ -845,6 +870,7 @@ function initializeCampaignInputs() {
         if (campaignInfoInput) {
             campaignInfoInput.addEventListener('input', function() {
                 updateCampaignState();
+                generateEmail();
             });
             
             // Add paste event listener
@@ -852,6 +878,7 @@ function initializeCampaignInputs() {
                 // Use setTimeout to ensure the pasted content is available
                 setTimeout(() => {
                     updateCampaignState();
+                    generateEmail();
                 }, 0);
             });
         }
@@ -860,12 +887,33 @@ function initializeCampaignInputs() {
         const sentenceModeStandard = document.getElementById(`sentenceModeStandard${i}`);
         const sentenceModeCustom = document.getElementById(`sentenceMode${i}`);
         if (sentenceModeStandard) {
-            sentenceModeStandard.addEventListener('change', window[`updateSentenceModeUI${i}`]);
+            sentenceModeStandard.addEventListener('change', function() {
+                window[`updateSentenceModeUI${i}`]();
+                updateCampaignState();
+                generateEmail();
+            });
         }
         if (sentenceModeCustom) {
-            sentenceModeCustom.addEventListener('change', window[`updateSentenceModeUI${i}`]);
+            sentenceModeCustom.addEventListener('change', function() {
+                window[`updateSentenceModeUI${i}`]();
+                updateCampaignState();
+                generateEmail();
+            });
         }
     }
+
+    // Add event listeners to all form inputs
+    const formInputs = document.querySelectorAll('#emailBuilderForm input, #emailBuilderForm select, #emailBuilderForm textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            updateCampaignState();
+            generateEmail();
+        });
+        input.addEventListener('change', function() {
+            updateCampaignState();
+            generateEmail();
+        });
+    });
 }
 
 function nl2br(str) {
@@ -978,7 +1026,7 @@ function generateEmail() {
                 <div style="background-color:${state.highlight ? '#dd1e31' : '#ffffff'}; color:${state.highlight ? 'white' : '#333333'}; padding:10px; border-radius:5px; margin-bottom:10px;">
                     <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                         <a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                            ${state.customTitle}
+                            ${nl2br(state.customTitle)}
                         </a>
                     </h3>
                     <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.customBodyText)}</p>
@@ -1000,12 +1048,12 @@ function generateEmail() {
             cellContent = `
                 <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                     <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                        ${titleContent}
+                        ${nl2br(titleContent)}
                     </a>
                     ${state.sentenceMode ? `<span style="font-weight: normal;">${state.textUnderTitle ? nl2br(state.textUnderTitle) : ''}</span>` : ''}
                 </h3>
-                ${!state.sentenceMode && state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${subtitle}</p>` : ''}
-                ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
+                ${!state.sentenceMode && state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(subtitle)}</p>` : ''}
+                ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(commissionDetails)}</p>` : ''}
                 ${!state.sentenceMode ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle || '')}</p>` : ''}
                 ${state.showThumbnail && !noThumbnails && landingPage ? `
                     <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
@@ -1304,8 +1352,8 @@ function generateEmail() {
 
         if (state.isCustom) {
             const titleContent = state.customLearnMoreUrl 
-                ? `<a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">${state.customTitle}</a>`
-                : state.customTitle;
+                ? `<a href="${state.customLearnMoreUrl}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">${nl2br(state.customTitle)}</a>`
+                : nl2br(state.customTitle);
             
             cellContent = `
                 <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px;">
@@ -1347,12 +1395,14 @@ function generateEmail() {
 
                     cellContent = `
                         <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                                ${nl2br(titleContent)}
+                            </a>
                             ${hyperlinkStart}
-                                ${titleContent}
                                 <span style="font-weight: normal;"> ${sentenceContent}</span>
                             ${hyperlinkEnd}
                         </h3>
-                        ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
+                        ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(commissionDetails)}</p>` : ''}
                         ${state.showThumbnail && !noThumbnails && landingPage ? `
                             <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
                                 <img src="https://images.weserv.nl/?url=${encodeURIComponent(landingPage)}" alt="${campaignName} Thumbnail" width="${cellWidth - 20}" style="display:block; margin:0 auto; border-radius: 8px;" />
@@ -1363,11 +1413,11 @@ function generateEmail() {
                     cellContent = `
                         <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                             <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
-                                ${titleContent}
+                                ${nl2br(titleContent)}
                             </a>
                         </h3>
-                        ${state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${subtitle}</p>` : ''}
-                        ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
+                        ${state.showSubtitle ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 5px 0; text-align: left;">${nl2br(subtitle)}</p>` : ''}
+                        ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(commissionDetails)}</p>` : ''}
                         <p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(state.textUnderTitle)}</p>
                         ${state.showThumbnail && !noThumbnails && landingPage ? `
                             <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
@@ -1424,9 +1474,9 @@ ${subjectTitle}
                         <tr>
                             <td align="left" valign="top" style="padding:20px; font-family:Arial, sans-serif; color:#333333;">
                                 <p style="font-size:14px; margin-bottom:20px;">#firstName#,</p>
-                                <p style="font-size:14px; margin-bottom:20px;">${pluralizeText(textAboveCampaigns, numCampaigns)}</p>
+                                <p style="font-size:14px; margin-bottom:20px;">${nl2br(pluralizeText(textAboveCampaigns, numCampaigns))}</p>
                                 ${campaignsHtml}
-                                <p style="font-size:14px; margin-top:20px;">${pluralizeText(afterLearnMore, numCampaigns)}</p>
+                                <p style="font-size:14px; margin-top:20px;">${nl2br(pluralizeText(afterLearnMore, numCampaigns))}</p>
                                 <p style="font-size: 14px; color: #333333; margin-top: 20px;">
                                     ${nl2br(signOffText)}
                                 </p>
@@ -1511,17 +1561,9 @@ function addScrollButtons() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const generateEmailBtn = document.getElementById('generateEmailBtn');
-    if (generateEmailBtn) {
-        generateEmailBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Generate button clicked');
-            updateCampaignState();
-            generateEmail();
-        });
-    } else {
-        console.error('Generate Email button not found');
-    }
+    // Instead, call generateEmail once on page load
+    updateCampaignState();
+    generateEmail();
 });
     </script>
 </body>
