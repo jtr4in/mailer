@@ -519,6 +519,7 @@
         <div id="output"></div>
         <div style="text-align: center; margin-top: 20px;">
             <button id="copyHtml" style="display: none;">Copy HTML</button>
+            <button id="copyLink" style="display: none;">Copy Link</button>
         </div>
     </div>
 
@@ -616,6 +617,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Add event listener for the Copy Link button
+    document.getElementById('copyLink').addEventListener('click', copyLink);
+
     // Initial toggle of subject title containers
     document.getElementById('subjectTitleContainer').style.display = 'none';
     document.getElementById('autoSubjectContainer').style.display = 'block';
@@ -632,6 +636,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Instead, call generateEmail once on page load
     updateCampaignState();
     generateEmail();
+
+    // Call loadSettingsFromUrl on page load
+    loadSettingsFromUrl();
 });
 
 function createCampaignInput(index) {
@@ -690,7 +697,7 @@ function createCampaignInput(index) {
                 </select>
 
                 <label for="campaignInfo${index}">Paste "Copy Image" from Admin:</label>
-                <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="1" placeholder="Paste the 'Copy Image' content">${state.campaignInfo || ''}</textarea>
+                <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="3" placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
 
                 <div class="toggle-container">
                     <label class="toggle-switch">
@@ -1106,10 +1113,12 @@ function generateEmail() {
     console.log('Email generated and inserted into output');
     
     const copyHtmlBtn = document.getElementById('copyHtml');
-    if (copyHtmlBtn) {
-        copyHtmlBtn.style.display = 'block';
+    const copyLinkBtn = document.getElementById('copyLink');
+    if (copyHtmlBtn && copyLinkBtn) {
+        copyHtmlBtn.style.display = 'inline-block';
+        copyLinkBtn.style.display = 'inline-block';
     } else {
-        console.error('copyHtml button not found');
+        console.error('copyHtml or copyLink button not found');
     }
 }
 
@@ -1495,10 +1504,12 @@ ${subjectTitle}
     output.innerHTML = htmlOutput;
     
     const copyHtmlBtn = document.getElementById('copyHtml');
-    if (copyHtmlBtn) {
-        copyHtmlBtn.style.display = 'block';
+    const copyLinkBtn = document.getElementById('copyLink');
+    if (copyHtmlBtn && copyLinkBtn) {
+        copyHtmlBtn.style.display = 'inline-block';
+        copyLinkBtn.style.display = 'inline-block';
     } else {
-        console.error('copyHtml button not found');
+        console.error('copyHtml or copyLink button not found');
     }
 }
 
@@ -1560,10 +1571,61 @@ function addScrollButtons() {
     };
 }
 
+// Add this function to generate and copy the link
+function copyLink() {
+    const currentUrl = new URL(window.location.href);
+    
+    // Get the current state of the form
+    const formData = new FormData(document.getElementById('emailBuilderForm'));
+    const settings = {};
+    for (let [key, value] of formData.entries()) {
+        settings[key] = value;
+    }
+    
+    // Add the settings and campaigns to the URL
+    currentUrl.searchParams.set('settings', JSON.stringify(settings));
+    currentUrl.searchParams.set('campaigns', JSON.stringify(campaignState));
+    
+    // Copy the URL to clipboard
+    navigator.clipboard.writeText(currentUrl.toString()).then(() => {
+        alert('Link copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy link: ', err);
+        alert('Failed to copy link. Please try again.');
+    });
+}
+
+// Add this function to load settings from URL parameters
+function loadSettingsFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const settings = JSON.parse(urlParams.get('settings') || '{}');
+    const campaigns = JSON.parse(urlParams.get('campaigns') || '[]');
+    
+    // Apply settings to form elements
+    for (let [key, value] of Object.entries(settings)) {
+        const element = document.getElementById(key);
+        if (element) {
+            if (element.type === 'checkbox') {
+                element.checked = value === 'on';
+            } else {
+                element.value = value;
+            }
+        }
+    }
+    
+    // Apply campaign state
+    campaignState = campaigns;
+    initializeCampaignInputs();
+    generateEmail();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Instead, call generateEmail once on page load
     updateCampaignState();
     generateEmail();
+    
+    // Call loadSettingsFromUrl on page load
+    loadSettingsFromUrl();
 });
     </script>
 </body>
