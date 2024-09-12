@@ -673,6 +673,10 @@ function createCampaignInput(index) {
                         <span class="slider"></span>
                     </label>
                     <span>Sentence Mode</span>
+                    <div class="checkbox-container" style="margin-left: 10px;">
+                        <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''}>
+                        <label for="hyperlinkSentence${index}">Hyperlinked</label>
+                    </div>
                 </div>
 
                 <label for="textUnderTitle${index}" id="textUnderTitleLabel${index}">
@@ -711,6 +715,10 @@ function createCampaignInput(index) {
                         <span class="slider"></span>
                     </label>
                     <span>Sentence Mode</span>
+                    <div class="checkbox-container" style="margin-left: 10px;">
+                        <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''}>
+                        <label for="hyperlinkSentence${index}">Hyperlinked</label>
+                    </div>
                 </div>
 
                 <label for="textUnderTitle${index}" id="textUnderTitleLabel${index}">
@@ -787,6 +795,7 @@ function updateCampaignState(newNumCampaigns) {
             const sentenceMode = isCustom
                 ? document.getElementById(`sentenceMode${i}`).checked !== false
                 : document.getElementById(`sentenceModeStandard${i}`).checked !== false;
+            const hyperlinkSentence = document.getElementById(`hyperlinkSentence${i}`).checked;
 
             campaignState[i] = isCustom ? {
                 isCustom: true,
@@ -797,7 +806,8 @@ function updateCampaignState(newNumCampaigns) {
                 customLearnMoreUrl: document.getElementById(`customLearnMoreUrl${i}`)?.value || '',
                 highlight: highlight,
                 sentenceMode: sentenceMode,
-                campaignTitle: campaignTitle
+                campaignTitle: campaignTitle,
+                hyperlinkSentence: hyperlinkSentence
             } : {
                 isCustom: false,
                 updateType: document.getElementById(`updateType${i}`)?.value || '',
@@ -808,7 +818,8 @@ function updateCampaignState(newNumCampaigns) {
                 showThumbnail: document.getElementById(`showThumbnailStandard${i}`).checked,
                 showSubtitle: document.getElementById(`showSubtitle${i}`).checked,
                 sentenceMode: sentenceMode,
-                campaignTitle: campaignTitle
+                campaignTitle: campaignTitle,
+                hyperlinkSentence: hyperlinkSentence
             };
         } else {
             console.error(`customToggle${i} not found`);
@@ -1330,12 +1341,16 @@ function generateEmail() {
                 const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignCountry})`;
                 
                 if (state.sentenceMode) {
+                    const sentenceContent = state.textUnderTitle ? nl2br(state.textUnderTitle) : '';
+                    const hyperlinkStart = state.hyperlinkSentence ? `<a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">` : '';
+                    const hyperlinkEnd = state.hyperlinkSentence ? '</a>' : '';
+
                     cellContent = `
                         <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
-                            <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
+                            ${hyperlinkStart}
                                 ${titleContent}
-                            </a>
-                            <span style="font-weight: normal;">${state.textUnderTitle ? nl2br(state.textUnderTitle) : ''}</span>
+                                <span style="font-weight: normal;"> ${sentenceContent}</span>
+                            ${hyperlinkEnd}
                         </h3>
                         ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${commissionDetails}</p>` : ''}
                         ${state.showThumbnail && !noThumbnails && landingPage ? `
