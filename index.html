@@ -519,7 +519,7 @@
         <div id="output"></div>
         <div style="text-align: center; margin-top: 20px;">
             <button id="copyHtml" style="display: none;">Copy HTML</button>
-            <button id="copyLink" style="display: none; background-color: black; color: white;">Copy Link</button>
+            <button id="copyLink" style="display: none;">Copy Link</button>
         </div>
     </div>
 
@@ -709,6 +709,10 @@ function createCampaignInput(index) {
                         <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''}>
                         <label for="hyperlinkSentence${index}">Linked</label>
                     </div>
+                    <div class="checkbox-container" style="margin-left: 10px;">
+                        <input type="checkbox" id="h2Sentence${index}" name="h2Sentence${index}" ${state.h2Sentence ? 'checked' : ''}>
+                        <label for="h2Sentence${index}">H2</label>
+                    </div>
                 </div>
 
                 <label for="textUnderTitle${index}" id="textUnderTitleLabel${index}">
@@ -750,6 +754,10 @@ function createCampaignInput(index) {
                     <div class="checkbox-container" style="margin-left: 10px;">
                         <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''}>
                         <label for="hyperlinkSentence${index}">Linked</label>
+                    </div>
+                    <div class="checkbox-container" style="margin-left: 10px;">
+                        <input type="checkbox" id="h2Sentence${index}" name="h2Sentence${index}" ${state.h2Sentence ? 'checked' : ''}>
+                        <label for="h2Sentence${index}">H2</label>
                     </div>
                 </div>
 
@@ -839,7 +847,8 @@ function updateCampaignState(newNumCampaigns) {
                 highlight: highlight,
                 sentenceMode: sentenceMode,
                 campaignTitle: campaignTitle,
-                hyperlinkSentence: hyperlinkSentence
+                hyperlinkSentence: hyperlinkSentence,
+                h2Sentence: document.getElementById(`h2Sentence${i}`).checked
             } : {
                 isCustom: false,
                 updateType: document.getElementById(`updateType${i}`)?.value || '',
@@ -851,7 +860,8 @@ function updateCampaignState(newNumCampaigns) {
                 showSubtitle: document.getElementById(`showSubtitle${i}`).checked,
                 sentenceMode: sentenceMode,
                 campaignTitle: campaignTitle,
-                hyperlinkSentence: hyperlinkSentence
+                hyperlinkSentence: hyperlinkSentence,
+                h2Sentence: document.getElementById(`h2Sentence${i}`).checked
             };
         } else {
             console.error(`customToggle${i} not found`);
@@ -1401,16 +1411,17 @@ function generateEmail() {
                     const sentenceContent = state.textUnderTitle ? nl2br(state.textUnderTitle) : '';
                     const hyperlinkStart = state.hyperlinkSentence ? `<a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">` : '';
                     const hyperlinkEnd = state.hyperlinkSentence ? '</a>' : '';
+                    const h2Style = state.h2Sentence ? 'font-size: 18px; font-weight: bold;' : 'font-size: 14px;';
 
                     cellContent = `
-                        <h3 style="color:${state.highlight ? 'white' : '#333333'}; font-size:14px; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                        <div style="${h2Style} color:${state.highlight ? 'white' : '#333333'}; margin-top:0; margin-bottom:5px; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
                             <a href="https://affiliates.maxbounty.com/campaign/${campaignID}" style="color:${state.highlight ? 'white' : '#dd1e31'}; text-decoration:none;">
                                 ${nl2br(titleContent)}
                             </a>
                             ${hyperlinkStart}
-                                <span style="font-weight: normal;"> ${sentenceContent}</span>
+                                <span style="font-weight: ${state.h2Sentence ? 'bold' : 'normal'};"> ${sentenceContent}</span>
                             ${hyperlinkEnd}
-                        </h3>
+                        </div>
                         ${state.showRate ? `<p style="color:${state.highlight ? 'white' : '#333333'}; font-size:12px; margin:0 0 10px 0; text-align: left;">${nl2br(commissionDetails)}</p>` : ''}
                         ${state.showThumbnail && !noThumbnails && landingPage ? `
                             <a href="https://affiliates.maxbounty.com/campaign/${campaignID}">
