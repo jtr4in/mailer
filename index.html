@@ -613,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const htmlContent = document.getElementById('output').innerHTML;
         navigator.clipboard.writeText(htmlContent).then(() => {
             // Optionally, you can add some visual feedback here
-            alert('HTML copied to clipboard!');
+           
         });
     });
 
@@ -1659,7 +1659,7 @@ function copyLink() {
     
     // Copy the URL to clipboard
     navigator.clipboard.writeText(currentUrl.toString()).then(() => {
-        alert('Link copied to clipboard!');
+   
     }).catch(err => {
         console.error('Failed to copy link: ', err);
         alert('Failed to copy link. Please try again.');
