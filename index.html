@@ -322,43 +322,42 @@
             
                 <select id="autoSubjectSelect" name="autoSubjectSelect">
                     <option value="">Select a subject title</option>
-                    
-                    <optgroup label="Campaign Updates" style="font-weight: bold;">
-                    </optgroup>
-                    <option value="Important Rate Changes for {campaign}">Important Rate Changes for {campaign}</option>
-                    <option value="New Assets Available for {campaign}">New Assets Available for {campaign}</option>
-                    <option value="Upcoming Changes: {campaign}">Upcoming Changes: {campaign}</option>
-                    
-                    <optgroup label="Promotions" style="font-weight: bold;">
-                    </optgroup>
-                    <option value="Special Offer: Updated Rates for {campaign}">Special Offer: Updated Rates for {campaign}</option>
-                    <option value="New Promotional Assets Now Available for {campaign}">New Promotional Assets Now Available for {campaign}</option>
-                    <option value="Boost Your Commissions with {campaign}">Boost Your Commissions with {campaign}</option>
 
-                    <optgroup label="Seasonal" style="font-weight: bold;">
-                    </optgroup>
-                    <option value="Holiday Prep: {campaign}">Holiday Prep: {campaign}</option>
-                    <option value="Prepare for the Season with {campaign}">Prepare for the Season with {campaign}</option>
-                    <option value="Seasonal Spotlight: {campaign} ">Seasonal Spotlight: {campaign}</option>
+ <optgroup label="Rates" style="font-weight: bold;">
+ </optgroup>
+ <option value="Important information for {campaign}">Important information for {campaign}</option>
+ <option value="Upcoming Changes for {campaign}">Upcoming Changes for {campaign}</option>
+ <option value="Temporarily Paused: {campaign}">Temporarily Paused: {campaign}</option>
+ <option value="Coming Back Soon: {campaign}">Coming Back Soon: {campaign}</option>
+ 
 
-                    <optgroup label="Resources" style="font-weight: bold;">
-                    </optgroup>
-                    <option value="Top Tips for {campaign}">Top Tips for {campaign}</option>
-                    <option value="Exclusive Coupon Codes for {campaign}"> Exclusive Coupon Codes for {campaign} </option>
-                    <option value="New Resources Available for {campaign}">New Assets Available for {campaign}</option>
+<optgroup label="Updates" style="font-weight: bold;">
+</optgroup>
+<option value="Rate Increase Notice for {campaign}">Rate Increase Notice for {campaign}</option>
+<option value="Rate Decrease Notice for {campaign}<">Rate Decrease Notice for {campaign}</option>
+<option value="Rate Adjustment for {campaign}">Rate Adjustment for {campaign}</option>
+<option value="New Conversion Points for {campaign}">New Conversion Points for {campaign}</option>
 
-                    <optgroup label="Pauses & Restarts" style="font-weight: bold;">
-                    </optgroup>
-                    <option value="Temporary Pause: {campaign}">Temporary Pause: {campaign} </option>
-                    <option value="Heads Up: {campaign} Restarting Soon">Heads Up, we're restarting {campaign}</option>
-                    <option value="Pausing {campaign}: What You Need to Know">Pausing {campaign}: What You Need to Know</option>
+<optgroup label="Assets" style="font-weight: bold;">
+</optgroup>
+<option value="New Assets Added for {campaign}">New Assets Added for {campaign}</option>
+<option value="New Promotional Materials for {campaign}">New Promotional Materials for {campaign}</option>
+<option value="Exclusive Coupons for {campaign}">Exclusive Coupons for {campaign}</option>
 
-                    <optgroup label="Rate Changes" style="font-weight: bold;">
-                    </optgroup>
-                    <option value="New Payout Rates for {campaign}">New Payout Rates for {campaign}</option>
-                    <option value="Rate Adjustment Alert: {campaign}">Rate Adjustment Alert: {campaign}</option>
-                    <option value="Boost Your Earnings: New Rates for {campaign}">Boost Your Earnings: New Rates for {campaign}</option>
-                </select>
+
+<optgroup label="Promotion"font-weight: bold;">
+</optgroup>
+<option value="Tips for Promoting {campaign}">Tips for Promoting {campaign}</option>
+<option value="Holiday Prep for {campaign}">Holiday Prep for {campaign}</option>
+<option value="Seasonal Readiness: {campaign}">Seasonal Readiness: {campaign}</option>
+
+
+
+
+
+
+</select>
+
 
 
 
@@ -1409,7 +1408,7 @@ function generateEmail() {
     console.log('Campaign info:', campaignInfo);
 
     // Replace {campaign} in subject line
-    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} (${campaignInfo.country})`);
+    subjectTitle = subjectTitle.replace(/{campaign}/g, `${campaignInfo.name} (${campaignInfo.country}) (${campaignInfo.id})`);
     console.log('Final subject title:', subjectTitle);
 
     const totalWidth = 600;
@@ -1465,7 +1464,7 @@ function generateEmail() {
             }
 
             if (campaignName && campaignID) {
-                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignCountry})`;
+                const titleContent = `${state.updateType !== 'None' ? state.updateType + ': ' : ''}${campaignName} (${campaignCountry}) (${campaignID})`;
                 
                 if (state.sentenceMode) {
                     const sentenceContent = state.textUnderTitle ? nl2br(state.textUnderTitle) : '';
