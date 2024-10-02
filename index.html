@@ -676,8 +676,8 @@ function createCampaignInput(index) {
                 <span>Custom Campaign</span>
             </div>
             <div class="standard-fields" id="standardFields${index}" style="display: ${state.isCustom ? 'none' : 'block'}">
-                <label for="updateType${index}">Update Type:</label>
-                <select id="updateType${index}" name="updateType${index}">
+                <label for="updateType${index}" style="display: none;">Update Type:</label>
+                <select id="updateType${index}" name="updateType${index}" style="display: none;">
                    <option value="None" ${state.updateType === 'None' ? 'selected' : ''}>None</option>
                     <option value="New" ${state.updateType === 'New' ? 'selected' : ''}>New</option>
                     <option value="Update" ${state.updateType === 'Update' ? 'selected' : ''}>Asset Update</option>
@@ -687,7 +687,7 @@ function createCampaignInput(index) {
                 </select>
 
                 <label for="campaignInfo${index}">Paste "Copy Image" from Admin:</label>
-                <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="1" placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
+                <textarea id="campaignInfo${index}" name="campaignInfo${index}" rows="3" placeholder="Paste the 'Copy Image' content here">${state.campaignInfo || ''}</textarea>
 
                 <div class="toggle-container">
                     <label class="toggle-switch">
@@ -696,12 +696,12 @@ function createCampaignInput(index) {
                     </label>
                     <span>Sentence</span>
                     <div class="checkbox-container" style="margin-left: 10px;">
-                        <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''}>
-                        <label for="hyperlinkSentence${index}">Linked</label>
+                        <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''} style="display: none;">
+                        <label for="hyperlinkSentence${index}" style="display: none;">Linked</label>
                     </div>
                     <div class="checkbox-container" style="margin-left: 10px;">
-                        <input type="checkbox" id="h2Sentence${index}" name="h2Sentence${index}" ${state.h2Sentence ? 'checked' : ''}>
-                        <label for="h2Sentence${index}">H2</label>
+                        <input type="checkbox" id="h2Sentence${index}" name="h2Sentence${index}" ${state.h2Sentence ? 'checked' : ''} style="display: none;">
+                        <label for="h2Sentence${index}" style="display: none;">H2</label>
                     </div>
                 </div>
 
@@ -742,12 +742,12 @@ function createCampaignInput(index) {
                     </label>
                     <span>Sentence Mode</span>
                     <div class="checkbox-container" style="margin-left: 10px;">
-                        <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''}>
-                        <label for="hyperlinkSentence${index}">Linked</label>
+                        <input type="checkbox" id="hyperlinkSentence${index}" name="hyperlinkSentence${index}" ${state.hyperlinkSentence ? 'checked' : ''} style="display: none;">
+                        <label for="hyperlinkSentence${index}" style="display: none;">Linked</label>
                     </div>
                     <div class="checkbox-container" style="margin-left: 10px;">
-                        <input type="checkbox" id="h2Sentence${index}" name="h2Sentence${index}" ${state.h2Sentence ? 'checked' : ''}>
-                        <label for="h2Sentence${index}">H2</label>
+                        <input type="checkbox" id="h2Sentence${index}" name="h2Sentence${index}" ${state.h2Sentence ? 'checked' : ''} style="display: none;">
+                        <label for="h2Sentence${index}" style="display: none;">H2</label>
                     </div>
                 </div>
 
@@ -1354,7 +1354,7 @@ function generateEmail() {
     const numCampaigns = parseInt(numCampaignsElement.value);
     console.log('Number of campaigns:', numCampaigns);
 
-    const useAutoTextBeforeSignOff = document.getElementById('useAutoTextBeforeSignOff').checked;
+   const useAutoTextBeforeSignOff = document.getElementById('useAutoTextBeforeSignOff').checked;
     const afterLearnMore = useAutoTextBeforeSignOff
         ? document.getElementById('autoTextBeforeSignOffSelect').value
         : document.getElementById('afterLearnMore').value;
