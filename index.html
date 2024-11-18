@@ -383,7 +383,7 @@
                     <optgroup label="Rates" style="font-weight: bold;">
                     </optgroup>
                     <option value="We have important information regarding the rates for the following campaign:">We have important information regarding the rates for the following campaign:</option>
-                    <option value="There are upcoming changes to the rates for the following campaign. Here’s what you need to know:">There are upcoming changes to the rates for the following campaign. Here’s what you need to know:</option>
+                    <option value="There are upcoming changes to the rates for the following campaign. Here's what you need to know:">There are upcoming changes to the rates for the following campaign. Here's what you need to know:</option>
                     <option value="The following campaign has been temporarily paused. Stay tuned for updates:">The following campaign has been temporarily paused. Stay tuned for updates:</option>
                     <option value="Good news! The following campaign will be coming back soon. Get ready to start promoting again:">Good news! The following campaign will be coming back soon. Get ready to start promoting again:</option>
                     
@@ -391,20 +391,20 @@
                     </optgroup>
                     <option value="There is a rate increase for the following campaign. Take advantage of the new opportunity:">There is a rate increase for the following campaign. Take advantage of the new opportunity:</option>
                     <option value="The following campaign will have a rate decrease. Make sure to adjust your promotions accordingly:">The following campaign will have a rate decrease. Make sure to adjust your promotions accordingly:</option>
-                    <option value="We’ve made a rate adjustment for the following campaign. Please review the updated payout:">We’ve made a rate adjustment for the following campaign. Please review the updated payout:</option>
-                    <option value="New conversion points have been added to the following campaign. Here’s what you should know:">New conversion points have been added to the following campaign. Here’s what you should know:</option>
+                    <option value="We've made a rate adjustment for the following campaign. Please review the updated payout:">We've made a rate adjustment for the following campaign. Please review the updated payout:</option>
+                    <option value="New conversion points have been added to the following campaign. Here's what you should know:">New conversion points have been added to the following campaign. Here's what you should know:</option>
                     
                     <optgroup label="Assets" style="font-weight: bold;">
                     </optgroup>
                     <option value="New assets have been added for the following campaign. Check them out to enhance your promotions:">New assets have been added for the following campaign. Check them out to enhance your promotions:</option>
-                    <option value="We’ve uploaded new promotional materials for the following campaign. Don’t miss out:">We’ve uploaded new promotional materials for the following campaign. Don’t miss out:</option>
+                    <option value="We've uploaded new promotional materials for the following campaign. Don't miss out:">We've uploaded new promotional materials for the following campaign. Don't miss out:</option>
                     <option value="Exclusive coupons are now available for the following campaign. Use them to drive more conversions:">Exclusive coupons are now available for the following campaign. Use them to drive more conversions:</option>
                     
                     <optgroup label="Promotion" style="font-weight: bold;">
                     </optgroup>
                     <option value="Here are some tips to help you promote the following campaign more effectively:">Here are some tips to help you promote the following campaign more effectively:</option>
-                    <option value="Get ready for the holidays! Here’s how you can prepare your promotions for the following campaign:">Get ready for the holidays! Here’s how you can prepare your promotions for the following campaign:</option>
-                    <option value="It’s the perfect time to get seasonally ready with the following campaign. Here’s what you need to know:">It’s the perfect time to get seasonally ready with the following campaign. Here’s what you need to know:</option>
+                    <option value="Get ready for the holidays! Here's how you can prepare your promotions for the following campaign:">Get ready for the holidays! Here's how you can prepare your promotions for the following campaign:</option>
+                    <option value="It's the perfect time to get seasonally ready with the following campaign. Here's what you need to know:">It's the perfect time to get seasonally ready with the following campaign. Here's what you need to know:</option>
                     
                     </select>
                     
@@ -714,7 +714,7 @@ function createCampaignInput(index) {
 
                 <div class="form-row">
                     <div class="checkbox-container">
-                        <input type="checkbox" id="highlightStandard${index}" name="highlightStandard${index}" ${state.highlight ?  : ''}>
+                        <input type="checkbox" id="highlightStandard${index}" name="highlightStandard${index}" ${state.highlight ? 'checked' : ''}>
                         <label for="highlightStandard${index}">Highlight</label>
                     </div>
                     <div class="checkbox-container">
@@ -722,7 +722,7 @@ function createCampaignInput(index) {
                         <label for="showRateStandard${index}">Rate</label>
                     </div>
                     <div class="checkbox-container">
-                        <input type="checkbox" id="showThumbnailStandard${index}" name="showThumbnailStandard${index}" ${state.showThumbnail !== false ? 'checked' : ''}>
+                        <input type="checkbox" id="showThumbnailStandard${index}" name="showThumbnailStandard${index}" ${state.showThumbnail === true ? 'checked' : ''}>
                         <label for="showThumbnailStandard${index}">Thumbnail</label>
                     </div>
                     <div class="checkbox-container" id="subtitleCheckboxContainer${index}">
