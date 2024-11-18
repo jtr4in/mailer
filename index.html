@@ -721,9 +721,9 @@ function createCampaignInput(index) {
                         <input type="checkbox" id="showRateStandard${index}" name="showRateStandard${index}" ${state.sentenceMode !== false ? '' : 'checked'}>
                         <label for="showRateStandard${index}">Rate</label>
                     </div>
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="showThumbnailStandard${index}" name="showThumbnailStandard${index}" ${state.showThumbnail === true ? 'checked' : ''}>
-                        <label for="showThumbnailStandard${index}">Thumbnail</label>
+                    <div class="checkbox-container" style="display: none;">
+                        <input type="checkbox" id="showThumbnailStandard${index}" name="showThumbnailStandard${index}" ${state.showThumbnail === true ? 'checked' : ''} style="display: none;">
+                        <label for="showThumbnailStandard${index}" style="display: none;">Thumbnail</label>
                     </div>
                     <div class="checkbox-container" id="subtitleCheckboxContainer${index}">
                         <input type="checkbox" id="showSubtitle${index}" name="showSubtitle${index}" ${state.showSubtitle !== false ? 'checked' : ''}>
